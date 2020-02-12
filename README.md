@@ -1,4 +1,4 @@
-# yokosuku2
+# ![](imgs/logoblackmini.gif)  
 <div align="center">
 <img src="imgs/logo.gif" title="imgs/logo.gif">
 </div>
