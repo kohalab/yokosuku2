@@ -1,0 +1,23 @@
+img < "chas.png"s           # img
+rct[0] < rect(0 ,32,16,32)r # nml
+rct[1] < rect(16,32,16,32)r # ago
+rct[2] < rect(32,32,16,32)r # wk1
+rct[3] < rect(48,32,16,32)r # wk2
+rct[4] < rect(64,32,16,32)r # wk0
+rct[5] < rect(80,32,16,32)r # stoop
+rct[6] < rect(96,40,16,24)r # syagamu
+
+jump_level < 6f             # tyouyakuryoku
+speed < 0.1f                # kasoku
+speed_div < 1.1f            # masatsu
+air_div < 1.05f             # kuuki masatsu
+
+wk0 < 4f
+wk1 < 2f
+wk2 < 4f
+wk3 < 3f
+
+hti_time = 10f
+hti < 0f
+ago_time = 60f
+ago < 4f
