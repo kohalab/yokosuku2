@@ -2,6 +2,8 @@
 <div align="center">
 <img src="imgs/logo.gif" title="imgs/logo.gif">
 </div>
+<br/>
 
-## Description
-*ただ* の横スクロールゲームの続編です
+<div style="text-align: center;">
+<i>ただ</i>の横スクロールゲームの続編です
+</div>
