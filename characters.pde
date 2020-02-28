@@ -16,7 +16,7 @@ void chabegin() {
   for (int i = 0; i < player_num; i++) {
     println("[chabegin] loading \""+player_config_paths[i]+"\"");
     playerscripts[i] = new yokoscript(player_config_paths[i]);
-    playerscripts[0].read();
+    playerscripts[i].read();
   }
   //playerscripts[0].dump();
   monster_list = loadStrings("config/list");

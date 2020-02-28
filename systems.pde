@@ -45,3 +45,12 @@ void fstbegin() {
   //
   println("[fonbegin] fonbegin end");
 }
+
+boolean[] keys = new boolean[0xffff];
+
+void keyPressed(){
+  if(key < 0xffff)keys[key] = true;
+}
+void keyReleased(){
+  if(key < 0xffff)keys[key] = false;
+}

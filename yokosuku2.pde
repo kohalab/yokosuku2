@@ -69,12 +69,20 @@ void draw() {
   simple_background();
   map.mapdraw();
   image(map.get(), 0, 0);
+  float hekinx = 0;
+  float hekiny = 0;
   for (int i = 0; i < player_num; i++) {
+    players[i].ctrl(keys);
+    players[i].map(map);
     players[i].draw();
     players[i].proc();
+    hekinx += players[i].pos.x;
+    hekiny += players[i].pos.y;
   }
+  hekinx /= player_num;
+  hekiny /= player_num;
 
-  map.scroll.to(frameCount*10*((frameCount+1)/1000.0), frameCount*2);
+  map.scroll.to(hekinx-(dwidth/2),hekiny-(dheight/2));
   map.scroll.proc();
 
   /*********** 前面 ***********/

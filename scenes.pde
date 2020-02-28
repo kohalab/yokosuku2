@@ -168,11 +168,12 @@ class background {
           //dr
           if (data.data[X][Y] != data.olddata[x][y]) {
             int n = data.data[X][Y];
-            g.image(getblock(blocks, n), x*block_size,y*block_size);
+            g.image(getblock(blocks, n), x*block_size, y*block_size);
             data.olddata[x][y] = data.data[X][Y];
             //println(x,y);
           }
-          
+        } else {
+          //g.image(getblock(blocks, 0), x*block_size, y*block_size);
         }
         //
       }
@@ -325,18 +326,18 @@ void title() {
 
 String start_text;
 
-boolean start_button(){
+boolean start_button() {
   textFont(system_font);
   //imgbox(mokubox,0,0,mousex,mousey);
   int x = (dwidth/2)-int((textWidth(start_text))/2);
-  int y = (int)(dheight/1.5);
+  int y = (int)(dheight/1.3);
   int w = (int)textWidth(start_text);
   int h = 64;
-  boolean a = imgbox(mokubox,x-32-16-4 +20,y-32-16,w+32+32,h);
+  boolean a = imgbox(mokubox, x-32-16-4 +20, y-32-16, w+32+32, h);
   fill(#aa6622);
-  if(a)fill(#ffffff);
-  text(start_text,x,y-10);
-  if(a&&mousePressed){
+  if (a)fill(#ffffff);
+  text(start_text, x, y-10);
+  if (a&&mousePressed) {
     status = status_edit;
   }
   return a&&mousePressed;

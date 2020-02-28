@@ -22,8 +22,8 @@ ai:type < 0f
 
 gravity < 0.1f
 
-key:left  < "a"s
-key:right < "d"s
-key:up    < "w"s
-key:down  < "s"s
-key:jump  < "SPACEw"s
+key:left  < "f"s
+key:right < "h"s
+key:up    < "t"s
+key:down  < "g"s
+key:jump  < "SPACEt"s

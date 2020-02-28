@@ -6,11 +6,11 @@ system_font < "data/font/mplus-2m-medium-16.vlw"s
 
 logo_images < "imgs/logo/"s
 width       < 30f
-height      < 18f
+height      < 20f
 
-debug       < 1f
+debug       < 0f
 
-scale       < 1f
+scale       < 2f
 
 map_width   < 4096f
 map_height  < 1024f

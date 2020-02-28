@@ -264,6 +264,7 @@ class yokoscript {
           }
           //println(type);
           if (type == 's') {
+            n = n.replaceAll("SPACE"," ");
             Strings.put(name, n);
           }
           //
@@ -280,11 +281,11 @@ class yokoscript {
     }
     for (HashMap.Entry<String, Float> entry : floats.entrySet()) {
       float r = entry.getValue();
-      println("[yokoscript] rect   Name:\""+entry.getKey()+"\""+" Num:"+r+";");
+      println("[yokoscript] Float   Name:\""+entry.getKey()+"\""+" Num:"+r+";");
     }
     for (HashMap.Entry<String, String> entry : Strings.entrySet()) {
       String r = entry.getValue();
-      println("[yokoscript] rect   Name:\""+entry.getKey()+"\""+" Num:"+r+";");
+      println("[yokoscript] String   Name:\""+entry.getKey()+"\""+" Num:"+r+";");
     }
   }
 }
