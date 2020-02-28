@@ -1,0 +1,20 @@
+# system configs
+
+block_size  < 16f
+
+system_font < "data/font/mplus-2m-medium-16.vlw"s
+
+logo_images < "imgs/logo/"s
+width       < 30f
+height      < 18f
+
+debug       < 1f
+
+scale       < 1f
+
+map_width   < 4096f
+map_height  < 1024f
+
+blocks < "imgs/blocks.png"s
+
+start_text < "START"s

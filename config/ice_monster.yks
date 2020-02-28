@@ -1,0 +1,23 @@
+img < "imgs/chas.png"s            # img
+img:nml < rect(0  ,128 ,16,16)r # nml
+img:ago < rect(0  ,128 ,16,16)r # ago
+img:wk1 < rect(16 ,128 ,16,16)r # wk1
+img:wk2 < rect(32 ,128 ,16,16)r # wk2
+img:wk0 < rect(0  ,128 ,16,16)r # wk0
+img:stp < rect(0  ,128 ,16,16)r # stoop
+img:sya < rect(0  ,128 ,16,16)r # syagamu
+
+jump_level < 6f        # tyouyakuryoku
+speed      < 0.1f      # kasoku
+speed_div  < 1.1f      # masatsu
+air_div    < 1.05f     # kuuki masatsu
+
+hti_time < 10f
+hti      < 0f
+ago_time < 60f
+ago      < 4f
+
+ai:enable < 1f
+ai:type < 1f
+
+gravity < 1f # ( (int) != 0 ) == true
