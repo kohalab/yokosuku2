@@ -1,0 +1,34 @@
+img < "imgs/kari0.png"s            # img
+img:nml < rect(0 ,64,16,32)r # nml
+img:ago < rect(16,64,16,32)r # ago
+img:wk1 < rect(32,64,16,32)r # wk1
+img:wk2 < rect(48,64,16,32)r # wk2
+img:wk0 < rect(64,64,16,32)r # wk0
+img:stp < rect(80,64,16,32)r # stoop
+img:sya < rect(96,64,16,24)r # syagamu
+
+jump_level < 6f        # tyouyakuryoku
+speed      < 0.4f      # kasoku
+speed_div  < 1.2f      # masatsu
+air_div    < 1.1f     # kuuki masatsu
+
+dmg_time < 10f
+dmg      < 0f
+ago_time < 60f
+ago      < 4f
+
+ai:enable < 0f
+ai:type < 0f
+
+player   < 1f
+
+gravity < 1f
+
+collision < 1f
+
+key:left  < "j"s
+key:right < "l"s
+key:up    < "i"s
+key:down  < "k"s
+key:jump  < "i"s
+key:dash  < "u"s

@@ -20,4 +20,6 @@ ago      < 4f
 ai:enable < 1f
 ai:type < 1f
 
+player   < 0f
+
 gravity < 1f # ( (int) != 0 ) == true

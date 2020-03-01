@@ -97,6 +97,10 @@ class point {
     xs = a;
     ys = b;
   }
+  point get() {
+    point a = new point(this.x, this.y, this.xs, this.ys);
+    return a;
+  }
 }
 
 /********************   get   ********************/
@@ -164,6 +168,16 @@ PImage getblock(PImage i, int a) {
   return i.get((a%w)*block_size, (a/w)*block_size, block_size, block_size);
 }
 
+PImage flip(PImage in, boolean h, boolean v) {
+  PImage out = createImage(in.width, in.height, ARGB);
+  for (int y = 0; y < in.height; y++) {
+    for (int x = 0; x < in.width; x++) {
+      out.set(h?(in.width-1)-x:x,v?(in.height-1)-y:y,in.get(x,y));
+    }
+  }
+  return out;
+}
+
 int nowCursor;
 void Cursor(int n) {
   nowCursor = n;
@@ -176,12 +190,54 @@ boolean imgbox(PImage img, int x, int y, int w, int h) {
   image(img.get(img.width/2, img.height/2, img.width/2, img.height/2), x-(img.width/2)+w, y-(img.height/2)+h);
   image(img.get(img.width/2, 0, 1, img.height/2), x+(img.width/2), y, w-(img.width), img.height/2);
   image(img.get(img.width/2, img.height/2, 1, img.height/2), x+(img.width/2), y+h-(img.height/2), w-(img.width), img.height/2);
-  image(img.get(0, img.height/2, img.width/2, 1), x, y+(img.height/2),img.width/2,h-(img.height));
-  image(img.get(img.width/2, img.height/2, img.width/2, 1), x-(img.width/2)+w, y+(img.height/2),img.width/2,h-(img.height));
-  image(img.get(img.width/2, img.height/2, 1, 1), x+(img.width/2), y+(img.height/2),w-(img.width),h-(img.height));
+  image(img.get(0, img.height/2, img.width/2, 1), x, y+(img.height/2), img.width/2, h-(img.height));
+  image(img.get(img.width/2, img.height/2, img.width/2, 1), x-(img.width/2)+w, y+(img.height/2), img.width/2, h-(img.height));
+  image(img.get(img.width/2, img.height/2, 1, 1), x+(img.width/2), y+(img.height/2), w-(img.width), h-(img.height));
   return (x < mousex && y < mousey && x+w > mousex && y+h > mousey);
 }
 
 int status_title = 0;
 int status_edit = 1;
 int status_play = 2;
+
+boolean col(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2, boolean d) {
+  if (d) { 
+    noFill();
+    stroke(255, 0, 0);
+    rect(x1, y1, w1, h1);
+    stroke(0, 0, 255);
+    rect(x2, y2, w2, h2);
+  }
+  return (x2 < (x1+w1)) && (x1 < (x2+w2)) && (y2 < (y1+h1)) && (y1 < (y2+h2));
+}
+
+boolean col(int x1, int y1, int w1, int h1, int x2, int y2) {
+  return (x1 <= x2 && x1+w1 > x2) && (y1 <= y2 && y1+h1 > y2);
+}
+
+boolean col(PImage col, int x1, int y1, int w1, int h1, int x2, int y2) {
+
+  //if(( (x1 <= x2 && x1+w1 > x2) && (y1 <= y2 && y1+h1 > y2) ))println((x2-x1), (y2-y1));
+  return getalpha(col, (x2-x1), (y2-y1)) && ( (x1 <= x2 && x1+w1 > x2) && (y1 <= y2 && y1+h1 > y2) );
+}
+
+
+boolean col(PImage col, int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
+  return getalpha(col, (x2-x1), (y2-y1)) && (x2 < (x1+w1)) && (x1 < (x2+w2)) && (y2 < (y1+h1)) && (y1 < (y2+h2));
+}
+
+int col_x(int x1, int y1, int w1, int h1, int x2, int y2) {
+  return (x2-x1);
+}
+int col_y(int x1, int y1, int w1, int h1, int x2, int y2) {
+  return (y2-y1);
+}
+
+
+boolean getalpha(PImage in, int x, int y) {
+  if (x >= 0 && y >= 0 && x < in.width && y < in.height) {
+    return (((in.get(x, y)>>24) &(1<<7)) != 0 );
+  } else {
+    return false;
+  }
+}

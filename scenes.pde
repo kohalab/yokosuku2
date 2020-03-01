@@ -96,9 +96,14 @@ class scroller {
   float ix, iy;
   float x, y ;
   float xs, ys;
+  int w, h;
   scroller() {
     xs = x = ix = 0;
     ys = y = iy = 0;
+  }
+  void wh(int a, int b) {
+    w = a;
+    h = b;
   }
   scroller(float a, float b) {
     x = ix = a;
@@ -109,6 +114,8 @@ class scroller {
   void proc() {
     x = ix;
     y = iy;
+    if (x < 0)x = 0;
+    if (y < 0)y = 0;
   }
   void go(float a, float b) {
     x = ix = a;
@@ -140,6 +147,7 @@ class background {
     data = new bgdata();
     resize(W, H);
     scroll = new scroller(0, 0);
+    scroll.wh(MAP_WIDTH, MAP_HEIGHT);
   }
   void resize(int w, int h) {
     DISP_WIDTH = w;
@@ -154,10 +162,11 @@ class background {
     map.data.begin(a, b, DISP_WIDTH, DISP_HEIGHT);
     map.data.olddata = map.data.all_set(map.data.olddata, 0xffffffff);
   }
+  int hazi = 0;
   void mapdraw() {
     g.beginDraw();
-    int scrx = (int)scroll.x/16;
-    int scry = (int)scroll.y/16;
+    int scrx = (int)scroll.x/block_size;
+    int scry = (int)scroll.y/block_size;
     //println("scr",scrx,scry);
     for (int y = 0; y < DISP_HEIGHT+2; y++) {
       for (int x = 0; x < DISP_WIDTH+2; x++) {
@@ -166,23 +175,36 @@ class background {
         int Y = y+scry;
         if (X >= 0 && Y >= 0 && X < data.width && Y < data.height) {
           //dr
-          if (data.data[X][Y] != data.olddata[x][y]) {
+          if (data.data[X][Y] != data.olddata[x][y] || hazi != 0) {
+            g.image(getblock(blocks, 0), x*block_size, y*block_size);
             int n = data.data[X][Y];
             g.image(getblock(blocks, n), x*block_size, y*block_size);
             data.olddata[x][y] = data.data[X][Y];
             //println(x,y);
           }
         } else {
-          //g.image(getblock(blocks, 0), x*block_size, y*block_size);
+          hazi = 2;
+          g.image(getblock(blocks, 1), x*block_size, y*block_size);
         }
         //
       }
     }
+    if (hazi > 0)hazi--;
     g.endDraw();
     //
   }
   PImage get() {
     return g.get(block_size+int(scroll.x%16), block_size+int(scroll.y%16), DISP_WIDTH *block_size, DISP_HEIGHT *block_size);
+  }
+  int getxmouse(int x) {
+    int a = int((float)(x+scroll.x+16)/block_size);
+
+    return a;
+  }
+  int getymouse(int y) {
+    int a = int((float)(y+scroll.y+16)/block_size);
+
+    return a;
   }
 }
 
@@ -194,7 +216,7 @@ void map_begin() {
   println("[mapbegin] start");
   map = new background(WIDTH, HEIGHT);
   map.begin(int(systemscripts.floats.get("map_width")), int(systemscripts.floats.get("map_height")));
-  maptest();
+  //maptest();
   println("[mapbegin] end");
 }
 
@@ -292,11 +314,11 @@ void title() {
       title_position_x += ((mousex-pmousex)*4/3)+int(noise(millis()/30.0, 13)*3-1.5);
       title_position_y += ((mousey-pmousey)*4/3)+int(noise(millis()/30.0, 47)*3-1.5);
       mv = 1;
-      title_move_random = int(random(1, 2.5));
+      title_move_random = int(random(1, 2.2));
       float s = (title_r>=0?title_r:-title_r);
       s /= ((s/1000)+1);
       //println(s);
-      title_r += ((s/1)+10)*( (mouseX-sx) - (nowimage.width/2))/9000.0;
+      title_r += ((s/1)+10)*( (dmouseX-sx) - (nowimage.width/2))/9000.0;
     }
     stroke(255);
     noFill();
@@ -341,4 +363,19 @@ boolean start_button() {
     status = status_edit;
   }
   return a&&mousePressed;
+}
+
+/* ############################################### editor ############################################### */
+
+void editor() {
+  int x = map.getxmouse(mousex);
+  int y = map.getymouse(mousey);
+  if (mousePressed) {
+    if (mouseButton == LEFT) {
+      map.data.data[x][y] = 0x1e;
+    }
+    if (mouseButton == RIGHT) {
+      map.data.data[x][y] = 0x00;
+    }
+  }
 }

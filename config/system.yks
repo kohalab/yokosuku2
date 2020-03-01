@@ -5,14 +5,14 @@ block_size  < 16f
 system_font < "data/font/mplus-2m-medium-16.vlw"s
 
 logo_images < "imgs/logo/"s
-width       < 30f
+width       < 38f
 height      < 20f
 
 debug       < 0f
 
-scale       < 2f
+scale       < 3f
 
-map_width   < 4096f
+map_width   < 8192f
 map_height  < 1024f
 
 blocks < "imgs/blocks.png"s
