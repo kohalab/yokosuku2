@@ -2,6 +2,7 @@
 
 class bgdata {
   int[][] olddata;
+  int[][] tmpdata;
   int[][] data;
 
   int width, height;
@@ -75,6 +76,7 @@ class bgdata {
 
   void begin(int w, int h, int dw, int dh) {
     data = new int[w][h];
+    tmpdata = new int[w][h];
     olddata = new int[w][h];
     width  = w;
     height = h;
@@ -88,13 +90,13 @@ class bgdata {
     }
     return out;
   }
-  void set(int x, int y, int d) {
-    if (x >= 0 && y >= 0 && x < width && x < height) {
+  void set(int[][] in, int x, int y, int d) {
+    if (x >= 0 && y >= 0 && x < in.length && y < in[0].length) {
       data[x][y] = d;
     }
   }
-  int get(int x, int y) {
-    if (x >= 0 && y >= 0 && x < width && x < height) {
+  int get(int[][] in, int x, int y) {
+    if (x >= 0 && y >= 0 && x < in.length && y < in[0].length) {
       return data[x][y];
     } else {
       return -1;
@@ -204,6 +206,60 @@ class background {
     if (hazi > 0)hazi--;
     g.endDraw();
     //
+  }
+  void proc() {
+    //
+    int scrx = (int)scroll.x/block_size;
+    int scry = (int)scroll.y/block_size;
+
+    for (int i = 0; i < freedom_list.length; i++) {
+      //
+      int t1 = freedom_list[i];
+      for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {
+        for (int x = scrx-2; x < scrx+2+DISP_WIDTH; x++) {
+          //
+          if ((t1/32) == (data.get(data.data, x, y)/32)) {
+            int n = otonari_san(data.data, x, y, (data.get(data.data, x, y)));
+            if (n == 15) {
+              n = naname_san(data.data, x, y, (data.get(data.data, x, y)))+16;
+            }
+            data.data[x][y] = ((data.get(data.data, x, y)&0xffe0)|n);
+            //
+          }
+          //
+        }
+      }
+      //
+    }
+    //
+  }
+  int otonari_san(int[][] in, int x, int y, int k) {
+    int a = data.get(in, x, y-1);
+    int b = data.get(in, x+1, y);
+    int c = data.get(in, x, y+1);
+    int d = data.get(in, x-1, y);
+    //
+    int o = 0;
+    o |= (((k/32) == (a/32))?1:0)<<0;
+    o |= (((k/32) == (b/32))?1:0)<<1;
+    o |= (((k/32) == (c/32))?1:0)<<2;
+    o |= (((k/32) == (d/32))?1:0)<<3;
+    //
+    return o;
+  }
+  int naname_san(int[][] in, int x, int y, int k) {
+    int a = data.get(in, x-1, y-1);
+    int b = data.get(in, x+1, y-1);
+    int c = data.get(in, x+1, y+1);
+    int d = data.get(in, x-1, y+1);
+    //
+    int o = 0;
+    o |= (((k/32) == (a/32))?0:1)<<0;
+    o |= (((k/32) == (b/32))?0:1)<<1;
+    o |= (((k/32) == (c/32))?0:1)<<2;
+    o |= (((k/32) == (d/32))?0:1)<<3;
+    //
+    return o;
   }
   PImage get() {
     return g.get(block_size+int(scroll.x%16), block_size+int(scroll.y%16), DISP_WIDTH *block_size, DISP_HEIGHT *block_size);
@@ -384,10 +440,51 @@ void editor() {
   int y = map.getymouse(mousey);
   if (mousePressed) {
     if (mouseButton == LEFT) {
-      map.data.data[x][y] = 0x1e;
+      map.data.data[x][y] = 0x40;
     }
     if (mouseButton == RIGHT) {
       map.data.data[x][y] = 0x00;
     }
+  }
+}
+
+int nokori = 0;
+
+
+void scroller() {
+
+  float hekinx = 0;
+  float hekiny = 0;
+  int smp = 0;
+  nokori = 0;
+  for (int i = 0; i < player_num; i++) {
+    if (!players[i].deaded) {
+      hekinx += players[i].pos.x;
+      hekiny += players[i].pos.y;
+      smp++;
+      nokori++;
+    } else {
+      //println("player"+i+" : dead");
+    }
+  }
+  if (smp > 0) {
+    hekinx /= smp;
+    hekiny /= smp;
+  }
+  map.scroll.to(hekinx-(dwidth/2), hekiny-(dheight/2));
+  map.scroll.proc();
+}
+
+void status() {
+  if (nokori == 0) {
+    rect img = systemscripts.rects.get("img:lost");
+    int x = (dwidth/2);
+    int y = (dheight/2);
+    tint(0);
+    image(get(blocks, img), x-(img.w/2), y-(img.h/2));
+    noTint();
+    fill(0);
+    textFont(system_font);
+    text(systemscripts.Strings.get("reset_text"),x-(textWidth(systemscripts.Strings.get("reset_text"))/2),y-16+(img.h*2));
   }
 }

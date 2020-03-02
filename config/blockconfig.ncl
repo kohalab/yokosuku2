@@ -1,2 +1,6 @@
 [nocol];
-00; air
+0000; air
+[freedom];
+0020;
+[dead];
+0040;

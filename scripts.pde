@@ -264,7 +264,7 @@ class yokoscript {
           }
           //println(type);
           if (type == 's') {
-            n = n.replaceAll("SPACE"," ");
+            n = n.replaceAll("\\$s"," ");
             Strings.put(name, n);
           }
           //

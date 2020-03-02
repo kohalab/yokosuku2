@@ -8,9 +8,9 @@ logo_images < "imgs/logo/"s
 width       < 38f
 height      < 20f
 
-debug       < 1f
+debug       < 0f
 
-scale       < 1f
+scale       < 2f
 
 map_width   < 8192f
 map_height  < 1024f
@@ -18,3 +18,6 @@ map_height  < 1024f
 blocks < "imgs/blocks.png"s
 
 start_text < "START"s
+reset_text < "PRESS$sSPACE"s
+
+img:lost < rect(0,3984,151,32)r

@@ -1,5 +1,7 @@
 PFont system_font;
 
+yokoscript systemscripts;
+
 int block_size;
 
 color ERROR_COLOR = color(255, 0, 0);
@@ -7,6 +9,8 @@ color ERROR_COLOR = color(255, 0, 0);
 PImage blocks;
 
 boolean[] col_list = new boolean[0x10000];
+int[] freedom_list = new int[0];
+boolean[] dead_list = new boolean[0x10000];
 
 void sysbegin() {
   println("[sysbegin] sysbegin start");
@@ -16,7 +20,6 @@ void sysbegin() {
 }
 
 String system_config_path = "config/system.yks";
-yokoscript systemscripts;
 
 void fstbegin() {
   println("[fonbegin] fonbegin start");
@@ -48,22 +51,29 @@ void fstbegin() {
   println("[fonbegin] fonbegin end");
 
   String[] blockconfig = loadStrings("config/blockconfig.ncl");
+  freedom_list = new int[0];
   for (int i = 0; i < col_list.length; i++) {
     col_list[i] = true;
+    dead_list[i] = false;
   }
   int type = -1;
   for (int i = 0; i < blockconfig.length; i++) {
     //
-    blockconfig[i] = blockconfig[i].replaceAll(" ","");
+    blockconfig[i] = blockconfig[i].replaceAll(" ", "");
     if (blockconfig[i].length() >= 3) {
       String m = splitTokens(blockconfig[i], ";")[0];
       //println(m);
-      if (m.length() == 2) {
+      if (m.length() <= 4) {
         //
         switch(type) {
         case 0:
           col_list[unhex(m)] = false;
           break;
+        case 1:
+          freedom_list = append(freedom_list, unhex(m));
+          break;
+        case 2:
+          dead_list[unhex(m)] = true;
         default:
           break;
         }
@@ -71,6 +81,8 @@ void fstbegin() {
       } else {
         //
         if (m.equals("[nocol]"))type = 0;
+        if (m.equals("[freedom]"))type = 1;
+        if (m.equals("[dead]"))type = 2;
         //
       }
       //
@@ -83,7 +95,12 @@ boolean[] keys = new boolean[0xffff];
 
 void keyPressed() {
   if (key < 0xffff)keys[key] = true;
-  if(key == 'R')maptest();
+  if (key == 'R')maptest();
+  if (nokori == 0) {
+    if (key == ' ') {
+      restart();
+    }
+  }
 }
 void keyReleased() {
   if (key < 0xffff)keys[key] = false;
