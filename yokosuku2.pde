@@ -24,7 +24,7 @@ void settings() {
   size((dwidth+(DEBUG?150:0))*SCALE, dheight*SCALE);
 }
 
-int player_num = 3;
+int player_num = 1;
 
 mob[] players = new mob[player_num];
 
@@ -42,30 +42,38 @@ void setup() {
 }
 
 void maptest() {
-  noiseSeed(int(random(-999999,999999)));
+  noiseSeed(int(random(-999999, 999999)));
+  //noiseSeed(2);
   for (int f = 0; f < map.data.height; f++) {
     for (int i = 0; i < map.data.height; i++) {
       int x = i;
       int y = f;
-      int s = 0;
+      int s = 0x00;
 
-      float e = noise(i/50.0, f/30.0);
+      float e = noise(i/100.0, f/50.0);
       e -= 0.5;
-      e /= 10;
+      e /= 5;
       e += 0.5;
+      //e -= 0.5;
       if (e < (float)f/map.data.height || f > map.data.height-4) {
         s = 0x1e;
       } else {
         s = 0x00;
       }
-      map.data.data[x][y] = map.data.set_map(map.data.data[x][y], s);
+      map.data.set(x, y, map.data.set_map(map.data.data[x][y], s));
+      if (noise(i/10.0, f/10.0) < ((float)(map.data.height-f)/map.data.height)/2) {
+        map.data.set(x, y, 0);
+      }
     }
   }
+  //for(int d = 0;d < ){
+
+  //}
   for (int f = 1; f < map.data.height; f++) {
     for (int i = 0; i < map.data.height; i++) {
       //
-      if (map.data.data[i][f-1] != 0 && map.data.data[i][f] == 0x1e) {
-        map.data.data[i][f] = 0x1f;
+      if (map.data.get(i, f-1) != 0 && map.data.get(i, f) == 0x1e) {
+        map.data.set(i, f, 0x1f);
       }
       //
     }
@@ -115,6 +123,7 @@ void draw() {
     hekinx += players[i].pos.x;
     hekiny += players[i].pos.y;
   }
+  println(hekinx, hekiny);
   hekinx /= player_num;
   hekiny /= player_num;
 

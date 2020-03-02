@@ -22,7 +22,7 @@ class mob {
   float work = 0;
 
   int stopcount;
-  
+
   float disp_x;
   float disp_y;
 
@@ -33,6 +33,13 @@ class mob {
   background map;
 
   HashMap <String, Float>control = new HashMap<String, Float>();
+
+  int newasituiteru;
+  int oldasituiteru;
+  int asituiteru;
+  int umatteru;
+  int asituiteru_len = 5;
+
 
   mob() {
     setup();
@@ -50,7 +57,7 @@ class mob {
     pos.xs = 0;
     pos.ys = 0;
   }
-  void tp(float x, float y,float a,float b) {
+  void tp(float x, float y, float a, float b) {
     pos.x = x;
     pos.y = y;
     pos.xs = a;
@@ -146,7 +153,11 @@ class mob {
     s += control.get("dash")/2;
     s /= control.get("down")*4+1;
     //player
-    if (control.get("jump")  > 0 && asituiteru > 0) {
+    
+    oldasituiteru = newasituiteru;
+    newasituiteru = asituiteru;
+    
+    if (control.get("jump")  > 0 && oldasituiteru > 0) {
       pos.ys = -script.floats.get("jump_level")*control.get("jump");
       pos.y -= 4;
       nowjump = nowjumplen+1;
@@ -171,27 +182,24 @@ class mob {
   void ai() {
   }
 
-  int asituiteru;
-  int asituiteru_len = 5;
-
   void collision() {
     if (collision) {
-      
-      if(script.floats.get("player") != 0){
-        if(disp_x < 32){
+
+      if (script.floats.get("player") != 0) {
+        if (disp_x < 32) {
           float a = disp_x-32;
           //println(a);
           pos.x -= a;
         }
       }
-      if(script.floats.get("player") != 0){
-        if(disp_x > dwidth-32){
+      if (script.floats.get("player") != 0) {
+        if (disp_x > dwidth-32) {
           float a = (dwidth-32)-disp_x;
           //println(a);
           pos.x += a;
         }
       }
-      
+
       //
       point old = pos.get();
       //
@@ -204,6 +212,7 @@ class mob {
           int X = x+scrx;
           int Y = y+scry;
           if (X >= 0 && Y >= 0 && X < map.data.width && Y < map.data.height) {
+            boolean deb = true;
             //  -------- start -------- 
             int n = map.data.data[X][Y];
             int xp = X*block_size-(block_size/2);
@@ -214,12 +223,13 @@ class mob {
 
             boolean jimen_enable = true;
 
-            boolean umatteru = false;
             if (
               col(xp, yp, block_size, block_size, 
-              (int)old.x+(pw/2)-1, (int)old.y-(ph/4/2)-1, 2, 2, col_list[n]&&DEBUG
+              (int)old.x+(pw/2)-1, (int)old.y-(ph/4/2)-1, 2, 2, col_list[n]&&deb
               )) {
-              umatteru = true;
+              if (col_list[n]) {
+                umatteru = 5;
+              }
             }
             /*
             if (
@@ -233,34 +243,79 @@ class mob {
              }
              }
              */
-            if (!umatteru) {
-              //
-              // up
-              if (
-                col(xp, yp, block_size, block_size, 
-                (int)old.x+(pw/2/2), (int)old.y-(ph/2), pw/2, block_size/1, col_list[n]&&DEBUG
-                )) {
-                if (col_list[n]) {
-                  pos.ys = 4;
-                  //pos.y = yp+(ph/2)+1;
-                  asituiteru = 0;
-                }
-              } else
-                // jimen
-                if (jimen_enable) {
-                  if (
-                    col(xp, yp, block_size, block_size, 
-                    (int)old.x+(pw/2/2), (int)old.y-(8)+(block_size), pw/2, 8, col_list[n]&&DEBUG
-                    )) {
-                    if (col_list[n] && nowjump == 0) {
-                      pos.ys = -0;
-                      pos.y = yp-block_size+1;
-                      asituiteru = asituiteru_len;
-                    }
+            if (umatteru > 0)umatteru--;
+            if (umatteru != 0) {
+              println("umatteru"+frameCount);
+            }
+            //
+            // up
+            if (
+              col(xp, yp, block_size, block_size, 
+              (int)old.x+(pw/2/2), (int)old.y-(ph)+8, pw/2, 8, col_list[n]&&deb
+              )) {
+              if (col_list[n]) {
+                pos.ys = 2;
+                //pos.y = yp+(ph/2)+1;
+                asituiteru = 0;
+              }
+            } else
+              // jimen
+              if (jimen_enable) {
+                if (
+                  col(xp, yp, block_size, block_size, 
+                  (int)old.x+(pw/2/2), (int)old.y+(block_size)-4, pw/2, 4, col_list[n]&&deb
+                  )) {
+                  if (col_list[n] && nowjump == 0) {
+                    pos.ys = -0;
+                    pos.y = yp-block_size+1;
+                    asituiteru = asituiteru_len;
                   }
                 }
-              //
+              }
+            //
+
+            // ---- left ----
+            if (
+              col(xp, yp, block_size, block_size, 
+              (int)old.x+(pw/2)+(4), (int)old.y-(ph)+(ph/3) +4, pw/4, ph-(ph/3), col_list[n]&&deb
+              )) {
+              if (col_list[n] ) {
+                pos.y -= 1;
+                pos.xs = -1;
+              }
             }
+            // ---- right ----
+            if (
+              col(xp, yp, block_size, block_size, 
+              (int)old.x, (int)old.y-(ph)+(ph/3) +4, pw/4, ph-(ph/3), col_list[n]&&deb
+              )) {
+              if (col_list[n] ) {
+                pos.y += 1;
+                pos.xs = +1;
+              }
+            }
+            /*
+            if (
+             col(xp, yp, block_size, block_size, 
+             (int)old.x+(pw/3)+(pw/4)+2, (int)old.y-(ph)+(ph/4)+2, pw/4, ph-8-4, col_list[n]&&deb
+             )) {
+             if (col_list[n]) {
+             pos.y -= 1;
+             pos.xs = -1;
+             //println("left");
+             }
+             }
+             // ---- right ----
+             if (
+             col(xp, yp, block_size, block_size, 
+             (int)old.x+(pw/4/3), (int)old.y-(ph)+(ph/4)+2, pw/4, ph-8-4, col_list[n]&&deb
+             )) {
+             if (col_list[n]) {
+             pos.y += 1;
+             pos.xs = +1;
+             }
+             }
+             */
 
 
             //  --------  end  --------

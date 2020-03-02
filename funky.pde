@@ -172,7 +172,7 @@ PImage flip(PImage in, boolean h, boolean v) {
   PImage out = createImage(in.width, in.height, ARGB);
   for (int y = 0; y < in.height; y++) {
     for (int x = 0; x < in.width; x++) {
-      out.set(h?(in.width-1)-x:x,v?(in.height-1)-y:y,in.get(x,y));
+      out.set(h?(in.width-1)-x:x, v?(in.height-1)-y:y, in.get(x, y));
     }
   }
   return out;
@@ -201,14 +201,19 @@ int status_edit = 1;
 int status_play = 2;
 
 boolean col(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2, boolean d) {
-  if (d) { 
+  boolean f = (x2 < (x1+w1)) && (x1 < (x2+w2)) && (y2 < (y1+h1)) && (y1 < (y2+h2));
+  ;
+  if (d && random(100) < 50) { 
     noFill();
     stroke(255, 0, 0);
-    rect(x1, y1, w1, h1);
+    if (f)stroke(255, 127, 0);
+    rect(x1-block_size/2, y1-block_size, w1, h1);
+    
     stroke(0, 0, 255);
-    rect(x2, y2, w2, h2);
+    if (f)stroke(0, 127, 255,64);
+    rect(x2-block_size/2, y2-block_size, w2, h2);
   }
-  return (x2 < (x1+w1)) && (x1 < (x2+w2)) && (y2 < (y1+h1)) && (y1 < (y2+h2));
+  return f;
 }
 
 boolean col(int x1, int y1, int w1, int h1, int x2, int y2) {

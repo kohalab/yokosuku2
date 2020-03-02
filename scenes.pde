@@ -88,6 +88,18 @@ class bgdata {
     }
     return out;
   }
+  void set(int x, int y, int d) {
+    if (x >= 0 && y >= 0 && x < width && x < height) {
+      data[x][y] = d;
+    }
+  }
+  int get(int x, int y) {
+    if (x >= 0 && y >= 0 && x < width && x < height) {
+      return data[x][y];
+    } else {
+      return -1;
+    }
+  }
 }
 
 /* ################################################ scroller ################################################ */
