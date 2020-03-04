@@ -29,3 +29,27 @@ void chabegin() {
   }
   println("[chabegin] chabegin end");
 }
+
+
+int mob_index;
+void new_mobs(mob in) {
+  int a = -1;
+  for (int i = 0; i < mobs_max; i++) {
+    //
+    if (mobs[i] == null) {
+      a = i;
+      break;
+    } else
+      if (mobs[i].deaded) {
+        a = i;
+        break;
+      }
+    //
+  }
+  if (a == -1) {
+    mobs[mob_index] = in;
+  } else {
+    mobs[a] = in;
+  }
+  println("new mob "+a);
+}

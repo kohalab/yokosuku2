@@ -37,6 +37,9 @@ void fstbegin() {
   block_size = int(systemscripts.floats.get("block_size"));//yokosuku2
   DEBUG = int(systemscripts.floats.get("debug"))!=0;//yokosuku2
   start_text = systemscripts.Strings.get("start_text");
+
+  mobs_max = (int)(float)systemscripts.floats.get("mob_max");
+  mobs = new mob[mobs_max];
   println(start_text);
 
   blocks = loadImage(systemscripts.Strings.get("blocks"));
@@ -100,6 +103,15 @@ void keyPressed() {
     if (key == ' ') {
       restart();
     }
+  }
+  if (key == 'n') {
+    for (int i = 0; i < monster_list.length; i++) {
+      mob c = new mob((int)players[0].pos.x, (int)players[0].pos.y);
+      c.script(monsters.get(monster_list[i]));
+      c.loads();
+      new_mobs(c);
+    }
+    //
   }
 }
 void keyReleased() {

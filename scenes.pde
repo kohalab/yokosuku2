@@ -125,6 +125,8 @@ class scroller {
     xs = 0;
     ys = 0;
   }
+  float tx;
+  float ty;
   void proc() {
     x = ix;
     y = iy;
@@ -439,12 +441,31 @@ void editor() {
   int x = map.getxmouse(mousex);
   int y = map.getymouse(mousey);
   if (mousePressed) {
+    int n = 0x30;
+    int c = 0;
     if (mouseButton == LEFT) {
-      map.data.data[x][y] = 0x40;
+      if (map.data.get(map.data.data, x, y) != n) {
+        map.data.set(map.data.data, x, y, n);
+        c = 1;
+      }
     }
     if (mouseButton == RIGHT) {
-      map.data.data[x][y] = 0x00;
+      n = 0;
+      if (map.data.get(map.data.data, x, y) != n) {
+        map.data.set(map.data.data, x, y, n);
+        c = -1;
+      }
     }
+    //
+    if (c != 0) {
+      String t = "";
+      if (c > 0)t = "do";
+      if (c < 0)t = "po";
+      int f = int(random(0, soundscripts.floats.get(t+"_length")));
+      stop_sound(t+f);
+      play_sound(t+f, mousex);
+    }
+    //
   }
 }
 
@@ -485,6 +506,41 @@ void status() {
     noTint();
     fill(0);
     textFont(system_font);
-    text(systemscripts.Strings.get("reset_text"),x-(textWidth(systemscripts.Strings.get("reset_text"))/2),y-16+(img.h*2));
+    text(systemscripts.Strings.get("reset_text"), x-(textWidth(systemscripts.Strings.get("reset_text"))/2), y-16+(img.h*2));
+  }
+}
+
+/* ############################################### debug ############################################### */
+
+void debuger() {
+}
+
+
+/* ########################################## draw_characters ########################################## */
+
+void proc_characters() {
+  for (int i = 0; i < player_num; i++) {
+    players[i].map(map);
+    players[i].proc();
+    players[i].ctrl(keys);
+  }
+
+  for (int i = 0; i < mobs_max; i++) {
+    if (mobs[i] != null) {
+      mobs[i].map(map);
+      mobs[i].proc();
+    }
+  }
+}
+
+void draw_characters() {
+  for (int i = 0; i < player_num; i++) {
+    players[i].draw();
+  }
+
+  for (int i = 0; i < mobs_max; i++) {
+    if (mobs[i] != null) {
+      mobs[i].draw();
+    }
   }
 }

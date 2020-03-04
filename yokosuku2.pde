@@ -26,7 +26,9 @@ void settings() {
 
 int player_num = 3;
 
+int mobs_max;
 mob[] players = new mob[player_num];
+mob[] mobs;
 
 void setup() {
   loading_images();
@@ -35,6 +37,7 @@ void setup() {
   frameRate(30);
   playerreset();
   maptest();
+  soundbegin();
 }
 
 void playerreset() {
@@ -67,16 +70,16 @@ void maptest() {
         s = 0x00;
       }
       map.data.set(map.data.data, x, y, map.data.set_map(map.data.data[x][y], s));
-      if (noise(i/10.0, f/10.0) < ((float)(map.data.height-f)/map.data.height)/2) {
+      if (i > 10 && noise(i/10.0, f/10.0) < ((float)(map.data.height-f)/map.data.height)/2) {
         //map.data.set(x, y, 0);
       }
     }
   }
-  for (int f = 1; f < map.data.height-1; f++) {
+  for (int f = 0; f < map.data.height-1; f++) {
     for (int i = 0; i < map.data.width; i++) {
       //
       if (map.data.get(map.data.data, i, f+1) != 0 && map.data.get(map.data.data, i, f) == 0) {
-        if(noise(i/2.0,f/2.0) < 0.15)map.data.set(map.data.data, i, f, 0x40);
+        if (noise(i/2.0, f/2.0) < 0.2)map.data.set(map.data.data, i, f, 0x40);
       }
       //
     }
@@ -141,12 +144,9 @@ void draw() {
   map.proc();
   map.mapdraw();
   image(map.get(), 0, 0);
-  for (int i = 0; i < player_num; i++) {
-    players[i].map(map);
-    players[i].proc();
-    players[i].ctrl(keys);
-    players[i].draw();
-  }
+  
+  proc_characters();
+  draw_characters();
 
   /*********** 前面 ***********/
   status();
@@ -167,6 +167,8 @@ void draw() {
     text(nf(frameRate, 2, 4), 0, 16);
 
     cursor(nowCursor);
+
+    debuger();
   }
 
   /**********  ｽｹｰﾗｰ  **********/

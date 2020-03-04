@@ -15,9 +15,14 @@ scale       < 2f
 map_width   < 8192f
 map_height  < 1024f
 
+mob_max     < 256f
+
 blocks < "imgs/blocks.png"s
 
 start_text < "START"s
 reset_text < "PRESS$sSPACE"s
 
 img:lost < rect(0,3984,151,32)r
+
+sound_path < "sound/"s
+sound_type < ".wav"s

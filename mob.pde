@@ -24,6 +24,12 @@ class mob {
   float workxs = 0;
   float work = 0;
 
+  int col_len = 4;
+  int col_left;
+  int col_right;
+  int col_up;
+  int col_down;
+
   int stopcount;
 
   float disp_x;
@@ -147,7 +153,7 @@ class mob {
 
   int nowjump;
   int nowjumplen = 4;
-  
+
   int dead_soto = 0;
   int dead_bloc = 1;
 
@@ -207,7 +213,51 @@ class mob {
     }
     collision();
   }
+
+  int ai_lr = +1;
   void ai() {
+    //
+    if (ai_type == 0) {
+      if (ai_lr > 0) {
+        control.put("right", 1f);
+        control.put("left", 0f);
+      } else {
+        control.put("right", 0f);
+        control.put("left", 1f);
+      }
+
+      if (col_right > 0 || col_left > 0) {
+        control.put("jump", 1f);
+      } else {
+        control.put("jump", 0f);
+      }
+
+      /*
+      
+       */
+
+      if (col_right > 0 && random(100) < 50)ai_lr = +1;
+      if (col_left > 0 && random(100) < 50)ai_lr = -1;
+      //
+    }
+
+    if (ai_type == 1) {
+      if (ai_lr > 0) {
+        control.put("right", 1f);
+        control.put("left", 0f);
+      } else {
+        control.put("right", 0f);
+        control.put("left", 1f);
+      }
+
+      if (col_right > 0 || col_left > 0) {
+        control.put("jump", 1f);
+      } else {
+        control.put("jump", 0f);
+      }
+      //
+    }
+    //
   }
 
   void collision() {
@@ -236,19 +286,22 @@ class mob {
           dead(dead_soto);
         }
       }
+
       //
       point old = pos.get();
       //
       int scrx = (int)(pos.x/block_size)-(map.DISP_HEIGHT/2);
       int scry = (int)(pos.y/block_size)-(map.DISP_HEIGHT/2);
       //
+
+      int e = 0;
       for (int y = 0; y < map.DISP_HEIGHT+2; y++) {
         for (int x = 0; x < map.DISP_WIDTH+2; x++) {
           //
           int X = x+scrx;
           int Y = y+scry;
           if (X >= 0 && Y >= 0 && X < map.data.width && Y < map.data.height) {
-            boolean deb = DEBUG;
+            boolean deb = DEBUG&&false;
             //  -------- start -------- 
             int n = map.data.data[X][Y];
             int xp = X*block_size-(block_size/2);
@@ -292,6 +345,7 @@ class mob {
                 pos.ys = 2;
                 //pos.y = yp+(ph/2)+1;
                 asituiteru = 0;
+                col_up = col_len;
               }
             } else
               // jimen
@@ -304,6 +358,7 @@ class mob {
                     pos.ys = -0;
                     pos.y = yp-block_size+1;
                     asituiteru = asituiteru_len;
+                    col_down = col_len;
                   }
                 }
               }
@@ -317,6 +372,7 @@ class mob {
               if (col_list[n] ) {
                 pos.y -= 1;
                 pos.xs = -1;
+                col_left = col_len;
               }
             }
             // ---- right ----
@@ -327,6 +383,7 @@ class mob {
               if (col_list[n] ) {
                 pos.y += 1;
                 pos.xs = +1;
+                col_right = col_len;
               }
             }
             /*
@@ -354,10 +411,19 @@ class mob {
 
 
             //  --------  end  --------
+            e = 1;
           }
           //
         }
       }
+
+      if (e == 0)dead(dead_soto);
+
+      if (col_up > 0)col_up--;
+      if (col_down > 0)col_down--;
+
+      if (col_right > 0)col_right--;
+      if (col_left > 0)col_left--;
       //
       //
       if (umatteru > 0)umatteru--;
