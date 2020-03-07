@@ -14,13 +14,15 @@ int status;
  2 = play
  */
 
+debug_window debug_window;
+
 void settings() {
   //noiseSeed(34);
   sysbegin();
   noSmooth();
   dwidth = WIDTH*block_size;
   dheight = HEIGHT*block_size;
-  size((dwidth+(DEBUG?150:0))*SCALE, dheight*SCALE);
+  size(dwidth*SCALE, dheight*SCALE);
   noiseDetail(6);
 }
 
@@ -29,6 +31,9 @@ int player_num = 3;
 int mobs_max;
 mob[] players = new mob[player_num];
 mob[] mobs;
+
+int yoyu_old;
+int yoyu;
 
 void setup() {
   loading_images();
@@ -53,6 +58,7 @@ void playerreset() {
 void maptest() {
   noiseSeed(int(random(-999999, 999999)));
   //noiseSeed(2);
+  /*
   for (int f = 0; f < map.data.height; f++) {
     for (int i = 0; i < map.data.height; i++) {
       int x = i;
@@ -73,6 +79,23 @@ void maptest() {
       if (i > 10 && noise(i/10.0, f/10.0) < ((float)(map.data.height-f)/map.data.height)/2) {
         //map.data.set(x, y, 0);
       }
+    }
+  }
+  */
+  
+  for (int f = 0; f < map.data.height; f++) {
+    for (int i = 0; i < map.data.height; i++) {
+      int x = i;
+      int y = f;
+      int s = 0x00;
+
+      if (f > map.data.height-4) {
+        s = 0x20;
+      } else {
+        s = 0x00;
+      }
+      map.data.set(map.data.data, x, y, map.data.set_map(map.data.data[x][y], s));
+
     }
   }
   for (int f = 0; f < map.data.height-1; f++) {
@@ -127,6 +150,7 @@ void restart() {
 int pmousex, pmousey, mousex, mousey;
 
 void draw() {
+  yoyu = millis()-yoyu_old;
   scroller();
   Cursor(ARROW);
   pmousex = pmouseX/SCALE;
@@ -144,7 +168,7 @@ void draw() {
   map.proc();
   map.mapdraw();
   image(map.get(), 0, 0);
-  
+
   proc_characters();
   draw_characters();
 
@@ -159,19 +183,10 @@ void draw() {
 
 
   /********** ﾃﾞﾊﾞｯｸﾞ **********/
-  if (DEBUG) {
-    wakuimage(map.g.get(), dwidth+10, 0+10, map.g.width/4, map.g.height/4, color(0), 2);
-
-    fill(255);
-    textFont(system_font);
-    text(nf(frameRate, 2, 4), 0, 16);
-
-    cursor(nowCursor);
-
-    debuger();
-  }
-
+  if(frameCount == 1 && DEBUG)debug_window = new debug_window();
   /**********  ｽｹｰﾗｰ  **********/
   image(get(0, 0, width/SCALE, height/SCALE), 0, 0, width, height);
   //println(map.data.get(0,0),col_list[0]);
+  
+  yoyu_old = millis();
 }

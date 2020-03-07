@@ -125,13 +125,14 @@ class scroller {
     xs = 0;
     ys = 0;
   }
-  float tx;
-  float ty;
   void proc() {
-    x = ix;
-    y = iy;
+    x = (ix+(x*4))/5;
+    y = (iy+(y*4))/5;
     if (x < 0)x = 0;
     if (y < 0)y = 0;
+    //if (x < 0)x = 0;
+    int my = h*block_size;
+    if (y > my)y = my;
   }
   void go(float a, float b) {
     x = ix = a;
@@ -163,7 +164,6 @@ class background {
     data = new bgdata();
     resize(W, H);
     scroll = new scroller(0, 0);
-    scroll.wh(MAP_WIDTH, MAP_HEIGHT);
   }
   void resize(int w, int h) {
     DISP_WIDTH = w;
@@ -177,6 +177,9 @@ class background {
   void begin(int a, int b) {
     map.data.begin(a, b, DISP_WIDTH, DISP_HEIGHT);
     map.data.olddata = map.data.all_set(map.data.olddata, 0xffffffff);
+    MAP_WIDTH = a;
+    MAP_HEIGHT = b;
+    scroll.wh(a-DISP_WIDTH-2, b-DISP_HEIGHT-2);
   }
   int hazi = 0;
   void mapdraw() {
@@ -492,7 +495,13 @@ void scroller() {
     hekinx /= smp;
     hekiny /= smp;
   }
-  map.scroll.to(hekinx-(dwidth/2), hekiny-(dheight/2));
+  float x = hekinx-(dwidth/2);
+  float y = hekiny-(dheight/2);
+  if (dist(map.scroll.x, map.scroll.y, x, y) < dwidth) {
+    map.scroll.to(x, y);
+  } else {
+    map.scroll.go(x, y);
+  }
   map.scroll.proc();
 }
 
@@ -543,4 +552,27 @@ void draw_characters() {
       mobs[i].draw();
     }
   }
+}
+
+/* ############################################### screen shot ############################################### */
+
+void screen_shot() {
+  String path = systemscripts.Strings.get("screenshot_path");
+  path += "screenshot - ";
+  path += year()+"-";
+  path += nf(month(), 2)+"-";
+  path += nf(day(), 2)+" - ";
+  path += nf(hour(), 2)+"-";
+  path += nf(minute(), 2)+"-";
+  path += nf(second(), 2)+" ";
+  path += nf((millis()%100), 3);
+  path += ".png";
+  PImage get = get();
+  noStroke();
+  fill(255, 128);
+  rect(0, 0, width, height);
+
+  play_sound("flash"+int(random(0, soundscripts.floats.get("flash_length"))), dwidth/2);
+
+  get.save(path);
 }

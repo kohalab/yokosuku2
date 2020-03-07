@@ -14,8 +14,8 @@ yokoscript soundscripts;
 void soundbegin() {
   println("[soundbegin] start");
   minim = new Minim(this);
-  out = minim.getLineOut();
   int buffer_size = 512;
+  out = minim.getLineOut(Minim.STEREO, buffer_size, 48000, 16);
   String path = systemscripts.Strings.get("sound_path");
   String type = systemscripts.Strings.get("sound_type");
   soundscripts = new yokoscript(path+"cfg.yks");
@@ -25,16 +25,16 @@ void soundbegin() {
   for (int i = 0; i < list.length; i++) {
     AudioSample a = minim.loadSample(path+list[i]+type, buffer_size);
     a.setGain(master_gain);
-    sounds.put(list[i],a);
+    sounds.put(list[i], a);
   }
   println("[soundbegin] end");
 }
 
-void play_sound(String name,int x){
+void play_sound(String name, int x) {
   sounds.get(name).trigger();
   sounds.get(name).setPan((float)(x-(dwidth/2))/(dwidth/2));
 }
 
-void stop_sound(String name){
+void stop_sound(String name) {
   sounds.get(name).stop();
 }

@@ -7,6 +7,7 @@ img:wk0 < rect(64, 0,16,32)r # wk0
 img:stp < rect(80, 0,16,32)r # stoop
 img:sya < rect(96, 8,16,24)r # syagamu
 img:gan < rect(240, 0,14,12)r # ga-n
+img:uem < rect(112, 0,16,32)r # uemiru
 
 jump < rect(224, 4080,32,8)r # ga-n
 
@@ -31,7 +32,7 @@ collision < 1f
 
 key:left  < "a"s
 key:right < "d"s
-key:up    < "w"s
+key:up    < "e"s
 key:down  < "s"s
-key:jump  < "$sw"s
+key:jump  < "w"s
 key:dash  < "q"s

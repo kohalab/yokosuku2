@@ -113,6 +113,9 @@ void keyPressed() {
     }
     //
   }
+  if (key == systemscripts.Strings.get("screenshot_key").charAt(0)) {
+    screen_shot();
+  }
 }
 void keyReleased() {
   if (key < 0xffff)keys[key] = false;

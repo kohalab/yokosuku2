@@ -157,6 +157,9 @@ class mob {
   int dead_soto = 0;
   int dead_bloc = 1;
 
+  int jump_count;
+  int down_count;
+
   void proc() {
     //
     //println(num, pos.x, pos.y);
@@ -190,10 +193,28 @@ class mob {
       oldasituiteru = newasituiteru;
       newasituiteru = asituiteru;
 
+      float jump_div = 1;
+
+      if (control.get("down") > 0.5) {
+        if (down_count == 0)play_sound("syagamu", (int)disp_x);
+        down_count++;
+        jump_div = 3;
+      } else {
+        down_count = 0;
+      }
+
       if (control.get("jump")  > 0 && oldasituiteru > 0) {
-        pos.ys = -script.floats.get("jump_level")*control.get("jump");
+        pos.ys = -script.floats.get("jump_level")*control.get("jump")/jump_div;
         pos.y -= 4;
+        if (jump_count == 0 && script.floats.get("player") != 0) {
+          stop_sound("minijmp");
+          play_sound("minijmp", (int)disp_x);
+        }
+        //println(jump_count);
         nowjump = nowjumplen+1;
+        jump_count++;
+      } else {
+        jump_count = 0;
       }
       if (control.get("left")  > 0) {
         pos.xs -= control.get("left")*script.floats.get("speed")*s;
@@ -208,6 +229,7 @@ class mob {
       work += workxs;
       //work++;
       if (nowjump > 0)nowjump--;
+
       //
       //println(asituiteru);
     }
@@ -265,28 +287,28 @@ class mob {
       return;
     }
     if (collision) {
-
+      /*
       if (script.floats.get("player") != 0) {
-        if (disp_x < -32) {
-          dead(dead_soto);
-        }
-      }
-      if (script.floats.get("player") != 0) {
-        if (disp_x > dwidth+32) {
-          dead(dead_soto);
-        }
-      }
-      if (script.floats.get("player") != 0) {
-        if (disp_y < -32) {
-          dead(dead_soto);
-        }
-      }
-      if (script.floats.get("player") != 0) {
-        if (disp_y > dheight+32) {
-          dead(dead_soto);
-        }
-      }
-
+       if (disp_x < -32) {
+       dead(dead_soto);
+       }
+       }
+       if (script.floats.get("player") != 0) {
+       if (disp_x > dwidth+32) {
+       dead(dead_soto);
+       }
+       }
+       if (script.floats.get("player") != 0) {
+       if (disp_y < -32) {
+       dead(dead_soto);
+       }
+       }
+       if (script.floats.get("player") != 0) {
+       if (disp_y > dheight+32) {
+       dead(dead_soto);
+       }
+       }
+       */
       //
       point old = pos.get();
       //
@@ -444,10 +466,12 @@ class mob {
     int wk = int((4.0+((work/10.0)%4.0))%4.0);
     //println(wk);
     rect r = script.rects.get("img:nml");
-    if (wk == 0)r = script.rects.get("img:wk0");
-    if (wk == 1)r = script.rects.get("img:wk1");
-    if (wk == 2)r = script.rects.get("img:wk0");
-    if (wk == 3)r = script.rects.get("img:wk2");
+
+    if (control.get("up") > 0.5)r = script.rects.get("img:uem");
+    if (wk == 0 && (control.get("left") > 0 || control.get("right") > 0) )r = script.rects.get("img:wk0");
+    if (wk == 1 && (control.get("left") > 0 || control.get("right") > 0) )r = script.rects.get("img:wk1");
+    if (wk == 2 && (control.get("left") > 0 || control.get("right") > 0) )r = script.rects.get("img:wk0");
+    if (wk == 3 && (control.get("left") > 0 || control.get("right") > 0) )r = script.rects.get("img:wk2");
 
     float axs = oldposs[(counter+0)%oldposs.length].xs;
     float bxs = oldposs[(counter+1)%oldposs.length].xs;
