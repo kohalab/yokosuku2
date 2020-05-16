@@ -3,6 +3,8 @@ import ddf.minim.*;
 int popnum = 5;
 int pownum = 5;
 
+int master_gain = -9;
+
 HashMap <String, AudioSample>sounds = new HashMap<String, AudioSample>();
 
 Minim minim;
@@ -21,7 +23,6 @@ void soundbegin() {
   soundscripts = new yokoscript(path+"cfg.yks");
   soundscripts.read();
   String[] list = loadStrings(path+"list");
-  int master_gain = -9;
   for (int i = 0; i < list.length; i++) {
     AudioSample a = minim.loadSample(path+list[i]+type, buffer_size);
     a.setGain(master_gain);
@@ -30,7 +31,11 @@ void soundbegin() {
   println("[soundbegin] end");
 }
 
-void play_sound(String name, int x) {
+void play_gain(String name, float x) {
+  sounds.get(name).setGain(master_gain+x);
+}
+void play_sound(String name, int x, float v) {
+  sounds.get(name).setGain(master_gain+v);
   sounds.get(name).trigger();
   sounds.get(name).setPan((float)(x-(dwidth/2))/(dwidth/2));
 }

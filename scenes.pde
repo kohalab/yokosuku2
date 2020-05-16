@@ -4,6 +4,8 @@ class bgdata {
   int[][] olddata;
   int[][] tmpdata;
   int[][] data;
+  int[][] data_overlay;
+  int[][] olddata_overlay;
 
   int width, height;
 
@@ -76,11 +78,47 @@ class bgdata {
 
   void begin(int w, int h, int dw, int dh) {
     data = new int[w][h];
+    data_overlay = new int[w][h];
+    olddata_overlay = new int[w][h];
     tmpdata = new int[w][h];
     olddata = new int[w][h];
     width  = w;
     height = h;
   }
+
+  byte[] save() {
+    int l = 0;
+    l += width*height*(32/8);//data
+    l += width*height*(32/8);//data_overlay
+    byte[] out = new byte[l];
+    int i = 0;
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < height; x++) {
+        out[i] = (byte)(data[x][y]>>24);
+        i++;
+        out[i] = (byte)(data[x][y]>>16);
+        i++;
+        out[i] = (byte)(data[x][y]>>8);
+        i++;
+        out[i] = (byte)(data[x][y]>>0);
+        i++;
+      }
+    }
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < height; x++) {
+        out[i] = (byte)(data_overlay[x][y]>>24);
+        i++;
+        out[i] = (byte)(data_overlay[x][y]>>16);
+        i++;
+        out[i] = (byte)(data_overlay[x][y]>>8);
+        i++;
+        out[i] = (byte)(data_overlay[x][y]>>0);
+        i++;
+      }
+    }
+    return out;
+  }
+
   int[][] all_set(int[][] in, int s) {
     int[][] out = new int[in.length][in[0].length];
     for (int f = 0; f < in[0].length; f++) {
@@ -194,12 +232,16 @@ class background {
         int Y = y+scry;
         if (X >= 0 && Y >= 0 && X < data.width && Y < data.height) {
           //dr
-          if (data.data[X][Y] != data.olddata[x][y] || hazi != 0) {
+          if (data.data[X][Y] != data.olddata[x][y] || data.data_overlay[X][Y] != data.olddata_overlay[x][y] || hazi != 0) {
             g.image(getblock(blocks, 0), x*block_size, y*block_size);
             int n = data.data[X][Y];
             g.image(getblock(blocks, n), x*block_size, y*block_size);
-            data.olddata[x][y] = data.data[X][Y];
             //println(x,y);
+            int a = data.data_overlay[X][Y];
+            if (a > 0)g.image(getblock(blocks, a), x*block_size, y*block_size);
+
+            data.olddata[x][y] = data.data[X][Y];
+            data.olddata_overlay[x][y] = data.data_overlay[X][Y];
           }
         } else {
           hazi = 2;
@@ -212,11 +254,29 @@ class background {
     g.endDraw();
     //
   }
+  int bitcount(int a) {
+    int o = 0;
+    o += (a&(1<<0)) != 0?1:0;
+    o += (a&(1<<1)) != 0?1:0;
+    o += (a&(1<<2)) != 0?1:0;
+    o += (a&(1<<3)) != 0?1:0;
+    o += (a&(1<<4)) != 0?1:0;
+    o += (a&(1<<5)) != 0?1:0;
+    o += (a&(1<<6)) != 0?1:0;
+    o += (a&(1<<7)) != 0?1:0;
+    return o;
+  }
   void proc() {
     //
     int scrx = (int)scroll.x/block_size;
     int scry = (int)scroll.y/block_size;
-
+    for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {
+      for (int x = scrx-2; x < scrx+2+DISP_WIDTH; x++) {
+        if (x >= 0 && y >= 0 && x < data.width && y < data.height) {
+          data.data_overlay[x][y] = 0;
+        }
+      }
+    }
     for (int i = 0; i < freedom_list.length; i++) {
       //
       int t1 = freedom_list[i];
@@ -225,10 +285,13 @@ class background {
           //
           if ((t1/32) == (data.get(data.data, x, y)/32)) {
             int n = otonari_san(data.data, x, y, (data.get(data.data, x, y)));
+            //println(n);
+            int a = naname_san(data.data, x, y, (data.get(data.data, x, y)));
             if (n == 15) {
-              n = naname_san(data.data, x, y, (data.get(data.data, x, y)))+16;
+              a += 16;
+              data.data_overlay[x][y] = (((data.get(data.data, x, y)/32)*32)+a);
             }
-            data.data[x][y] = ((data.get(data.data, x, y)&0xffe0)|n);
+            data.data[x][y] = (((data.get(data.data, x, y)/32)*32)+n);
             //
           }
           //
@@ -466,7 +529,7 @@ void editor() {
       if (c < 0)t = "po";
       int f = int(random(0, soundscripts.floats.get(t+"_length")));
       stop_sound(t+f);
-      play_sound(t+f, mousex);
+      play_sound(t+f, mousex, 0);
     }
     //
   }
@@ -538,20 +601,27 @@ void proc_characters() {
     if (mobs[i] != null) {
       mobs[i].map(map);
       mobs[i].proc();
+      if (mobs[i].deadcount > 30 *15) {
+        mobs[i] = null;
+      }
     }
   }
 }
+
+int mob_used;
 
 void draw_characters() {
   for (int i = 0; i < player_num; i++) {
     players[i].draw();
   }
-
+  int mb = 0;
   for (int i = 0; i < mobs_max; i++) {
     if (mobs[i] != null) {
       mobs[i].draw();
+      if (mobs[i].deaded == false)mb++;
     }
   }
+  mob_used = mb;
 }
 
 /* ############################################### screen shot ############################################### */
@@ -572,7 +642,7 @@ void screen_shot() {
   fill(255, 128);
   rect(0, 0, width, height);
 
-  play_sound("flash"+int(random(0, soundscripts.floats.get("flash_length"))), dwidth/2);
+  play_sound("flash"+int(random(0, soundscripts.floats.get("flash_length"))), dwidth/2, 0);
 
   get.save(path);
 }

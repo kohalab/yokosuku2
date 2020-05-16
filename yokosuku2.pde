@@ -16,15 +16,19 @@ int status;
 
 debug_window debug_window;
 
+int right_control_width = 0;
+
 void settings() {
   //noiseSeed(34);
   sysbegin();
   noSmooth();
   dwidth = WIDTH*block_size;
   dheight = HEIGHT*block_size;
-  size(dwidth*SCALE, dheight*SCALE);
+  size(dwidth*SCALE+right_control_width, dheight*SCALE);
   noiseDetail(6);
 }
+
+float fr;
 
 int player_num = 3;
 
@@ -150,6 +154,7 @@ void restart() {
 int pmousex, pmousey, mousex, mousey;
 
 void draw() {
+  fr = frameRate;
   yoyu = millis()-yoyu_old;
   scroller();
   Cursor(ARROW);

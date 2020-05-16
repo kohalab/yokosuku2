@@ -110,6 +110,7 @@ void keyPressed() {
       c.script(monsters.get(monster_list[i]));
       c.loads();
       new_mobs(c);
+      println("new "+monster_list[i]);
     }
     //
   }

@@ -16,11 +16,13 @@ class mob {
   boolean ai_enable;
 
   PImage nowplayer;
+  int player_width = 0;
+  int player_height = 0;
   int ai_type;
 
   float gravity = 0;
 
-  int lr = 1;//-1or1
+  int lr = -1;//-1or1
   float workxs = 0;
   float work = 0;
 
@@ -50,6 +52,7 @@ class mob {
   int asituiteru_len = 5;
 
   boolean deaded;
+  int deadcount;
 
 
   mob() {
@@ -156,9 +159,21 @@ class mob {
 
   int dead_soto = 0;
   int dead_bloc = 1;
+  int dead_end = 2;
 
   int jump_count;
   int down_count;
+
+  int hc_count;
+  int tk0_count;
+  int tk1_count;
+
+  int bsdr_count;
+
+  int disp_kyori;
+  float vol;
+
+  int frameCount;
 
   void proc() {
     //
@@ -179,9 +194,56 @@ class mob {
     }
 
     if (deaded == true) {
-      if (control.get("jump") > 0.5) {
-        respawn();
+      frameCount = 0;
+      if (script.floats.get("player") != 0) {
+        if (control.get("jump") > 0.5) {
+          respawn();
+        }
+        if (control.get("dash") > 0.5) {
+          if (tk0_count == 0) {
+            String t = "tk";
+            int f = 0;
+            //stop_sound(t+f);
+            play_sound(t+f, (int)((float)num/(player_num-1)*dwidth), vol);
+            tk0_count = 9999;
+          }
+        } else {
+          tk0_count = 0;
+        }
+        if (control.get("down") > 0.5) {
+          if (tk1_count == 0) {
+            String t = "tk";
+            int f = 1;
+            //stop_sound(t+f);
+            play_sound(t+f, (int)((float)num/(player_num-1)*dwidth), vol);
+            tk1_count = 9999;
+          }
+        } else {
+          tk1_count = 0;
+        }
+        if (control.get("left") > 0.5) {
+          if (bsdr_count == 0) {
+            String t = "bsdr";
+            play_sound(t, (int)((float)num/(player_num-1)*dwidth), vol);
+            bsdr_count = 9999;
+          }
+        } else {
+          bsdr_count = 0;
+        }
+        if (control.get("right") > 0.5) {
+          if (hc_count == 0) {
+            String t = "hc";
+            int f = int(random(0, soundscripts.floats.get(t+"_length")));
+            //stop_sound(t+f);
+            play_sound(t+f, (int)((float)num/(player_num-1)*dwidth), vol);
+            hc_count = 9999;
+          }
+        } else {
+          hc_count = 0;
+        }
       }
+      //
+      deadcount++;
     }
     if (deaded == false) {
 
@@ -196,7 +258,7 @@ class mob {
       float jump_div = 1;
 
       if (control.get("down") > 0.5) {
-        if (down_count == 0)play_sound("syagamu", (int)disp_x);
+        if (down_count == 0)play_sound("syagamu", (int)disp_x, vol);
         down_count++;
         jump_div = 3;
       } else {
@@ -208,7 +270,7 @@ class mob {
         pos.y -= 4;
         if (jump_count == 0 && script.floats.get("player") != 0) {
           stop_sound("minijmp");
-          play_sound("minijmp", (int)disp_x);
+          play_sound("minijmp", (int)disp_x, vol);
         }
         //println(jump_count);
         nowjump = nowjumplen+1;
@@ -232,6 +294,12 @@ class mob {
 
       //
       //println(asituiteru);
+      frameCount++;
+      if (script.floats.get("age") != null) {
+        if (frameCount > script.floats.get("age"))dead(dead_end);
+      }
+      disp_kyori = int(disp_x-(dwidth/2));
+      vol = -((disp_kyori > 0?disp_kyori:-disp_kyori)/70.0);
     }
     collision();
   }
@@ -278,6 +346,20 @@ class mob {
         control.put("jump", 0f);
       }
       //
+    }
+    if (ai_type == 100) {
+    }
+    if (ai_type == 88580) {
+      String name = script.Strings.get("syokanname");
+      float syokantime  = script.floats.get("syokantime");
+      if (int(frameCount%syokantime) == 0) {
+        mob c = new mob((int)pos.x, (int)pos.y);
+        c.script(monsters.get(name));
+        c.loads();
+        c.pos.xs = lr*script.floats.get("syokanspeed");
+        c.pos.ys = -script.floats.get("syokanheight");
+        new_mobs(c);
+      }
     }
     //
   }
@@ -329,8 +411,8 @@ class mob {
             int xp = X*block_size-(block_size/2);
             int yp = Y*block_size;
 
-            int pw = nowplayer.width;
-            int ph = nowplayer.height;
+            int pw = player_width;
+            int ph = player_height;
 
             boolean jimen_enable = true;
 
@@ -481,24 +563,52 @@ class mob {
     //if (stopcount > 0)r = script.rects.get("img:stp");
     //println(axs, bxs);
     //if(stopcount > 0)pos.x += ((counter%2)*2);
-    if (control.get("down") > 0.5)r = script.rects.get("img:sya");
+    if (control.get("down") > 0.5) {
+      r = script.rects.get("img:sya");
+      if (script.floats.get("sya_anime") != null) {
+        if (wk%2 == 1)r = script.rects.get("img:sya2");
+      }
+    }
+
+    player_width = nowplayer.width;
+    player_height = nowplayer.height;
+    if (control.get("down") > 0.5) {
+      if (down_count > 0 && down_count < 2) {
+        rect nr = script.rects.get("img:nml");
+        rect sr = script.rects.get("img:sya");
+        player_height = (int)aida(nr.h, sr.h, down_count/1.0);
+      }
+    }
+
     nowplayer = flip(get(img, r), lr==1, deaded);
-    disp_x = pos.x-(r.w/2)-map.scroll.x;
-    disp_y = pos.y-r.h-map.scroll.y;
-    image(nowplayer, disp_x, disp_y);
+    if (map == null)return;
+    disp_x = pos.x-(player_width/2)-map.scroll.x;
+    disp_y = pos.y-player_height-map.scroll.y;
+    image(nowplayer, disp_x, disp_y, player_width, player_height);
     if (stopcount > 0)stopcount--;
     if (deaded && script.floats.get("player") != 0) {
       rect g = script.rects.get("img:gan");
-      rect j = script.rects.get("jump");
-      image(get(blocks, j), num*(g.w*2), dheight-(g.h*2)-j.h);
-      image(get(img, g), num*(g.w*2), dheight-(g.h*2), g.w*2, g.h*2);
+      if (disp_x >= -g.w && disp_y >= -g.h && disp_x < dwidth && disp_y < dheight) {
+        rect j = script.rects.get("jump");
+        image(get(blocks, j), num*(g.w*2), dheight-(g.h*2)-j.h);
+        image(get(img, g), num*(g.w*2), dheight-(g.h*2), g.w*2, g.h*2);
+      }
     }
   }
 
   void dead(int t) {
     collision = false;
     deaded = true;
-    pos.ys = -6;
+    if (t != dead_end) {
+      pos.ys = -6;
+    }
+    if (script.floats.get("nodeadsound") == null) {
+      stop_sound("dead");
+      play_sound("dead", (int)disp_x, vol);
+    }
+    if (script.floats.get("deadnull") != null) {
+      pos.ys = 10000;
+    }
   }
 
   void respawn() {

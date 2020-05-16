@@ -1,18 +1,18 @@
 img < "imgs/kari0.png"s            # img
-img:nml < rect(0 , 0,16,32)r # nml
-img:ago < rect(16, 0,16,32)r # ago
-img:wk1 < rect(32, 0,16,32)r # wk1
-img:wk2 < rect(48, 0,16,32)r # wk2
-img:wk0 < rect(64, 0,16,32)r # wk0
-img:stp < rect(80, 0,16,32)r # stoop
+img:nml < rect(0 , 1,16,31)r # nml
+img:ago < rect(16, 1,16,31)r # ago
+img:wk1 < rect(32, 1,16,31)r # wk1
+img:wk2 < rect(48, 1,16,31)r # wk2
+img:wk0 < rect(64, 1,16,31)r # wk0
+img:stp < rect(80, 1,16,31)r # stoop
 img:sya < rect(96, 8,16,24)r # syagamu
-img:gan < rect(240, 0,14,12)r # ga-n
-img:uem < rect(112, 0,16,32)r # uemiru
+img:gan < rect(240, 1,14,12)r # ga-n
+img:uem < rect(112, 1,16,31)r # uemiru
 
 jump < rect(224, 4080,32,8)r # ga-n
 
-jump_level < 6f        # tyouyakuryoku
-speed      < 0.4f      # kasoku
+jump_level < 6.3f        # tyouyakuryoku
+speed      < 0.42f      # kasoku
 speed_div  < 1.2f      # masatsu
 air_div    < 1.1f     # kuuki masatsu
 

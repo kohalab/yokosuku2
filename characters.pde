@@ -51,5 +51,5 @@ void new_mobs(mob in) {
   } else {
     mobs[a] = in;
   }
-  println("new mob "+a);
+  //println("new mob "+a);
 }

@@ -8,7 +8,7 @@ logo_images < "imgs/logo/"s
 width       < 38f
 height      < 20f
 
-debug       < 1f
+debug       < 0f
 
 scale       < 1f
 
