@@ -62,18 +62,20 @@ void playerreset() {
 void maptest() {
   noiseSeed(int(random(-999999, 999999)));
   //noiseSeed(2);
-  /*
+
   for (int f = 0; f < map.data.height; f++) {
     for (int i = 0; i < map.data.height; i++) {
       int x = i;
       int y = f;
       int s = 0x00;
 
-      float e = noise(i/100.0, f/50.0);
+      float e = noise(i/2.0/100.0, f/2.0/50.0);
       e -= 0.5;
       e /= 5;
       e += 0.5;
-      //e -= 0.53;
+
+
+      e += 0.4;
       if (e < (float)f/map.data.height || f > map.data.height-4) {
         s = 0x20;
       } else {
@@ -85,28 +87,37 @@ void maptest() {
       }
     }
   }
-  */
-  
+
+  /*
   for (int f = 0; f < map.data.height; f++) {
-    for (int i = 0; i < map.data.height; i++) {
-      int x = i;
-      int y = f;
-      int s = 0x00;
-
-      if (f > map.data.height-4) {
-        s = 0x20;
-      } else {
-        s = 0x00;
-      }
-      map.data.set(map.data.data, x, y, map.data.set_map(map.data.data[x][y], s));
-
-    }
-  }
+   for (int i = 0; i < map.data.width; i++) {
+   int x = i;
+   int y = f;
+   int s = 0x00;
+   
+   if (f > map.data.height-4) {
+   s = 0x20;
+   } else {
+   s = 0x00;
+   }
+   if (f == map.data.height-3) {
+   if(random(100) < 6)s = 0x48;
+   if(random(100) < 6)s = 0x49;
+   }
+   map.data.set(map.data.data, x, y, map.data.set_map(map.data.data[x][y], s));
+   }
+   }
+   */
   for (int f = 0; f < map.data.height-1; f++) {
     for (int i = 0; i < map.data.width; i++) {
       //
       if (map.data.get(map.data.data, i, f+1) != 0 && map.data.get(map.data.data, i, f) == 0) {
         if (noise(i/2.0, f/2.0) < 0.2)map.data.set(map.data.data, i, f, 0x40);
+        if (random(100) < 3)map.data.set(map.data.data, i, f, 0x48);
+        if (random(100) < 3)map.data.set(map.data.data, i, f, 0x49);
+        if (random(100) < 3)map.data.set(map.data.data, i, f, 0x58);
+        if (noise(i/8.0, 4821) < 0.3)map.data.set(map.data.data, i, f, 0x59);
+        if (noise(i/8.0, 1230) < 0.3)map.data.set(map.data.data, i, f, 0x5A);
       }
       //
     }
@@ -173,6 +184,41 @@ void draw() {
   map.proc();
   map.mapdraw();
   image(map.get(), 0, 0);
+  //************** test **************//
+  g.strokeWeight(2);
+  for (int i = 0; i < 100; i++) {
+    g.stroke(255);
+    float x = noise(i, 36, millis()/100000.0)*WIDTH*3*block_size;
+    float y = noise(i, 61, millis()/100000.0)*HEIGHT*3*block_size;
+    x -= WIDTH*block_size;
+    y -= HEIGHT*block_size;
+
+    if (x >= -block_size*4 && y >= -block_size*4 && x < (WIDTH*block_size)+(block_size*4) && y < HEIGHT*block_size+(block_size*4)) {
+
+      x -= map.scroll.px*1.5;
+      y -= map.scroll.py*1.5;
+
+      x %= WIDTH*block_size;
+      y %= HEIGHT*block_size;
+      x += WIDTH*block_size;
+      y += HEIGHT*block_size;
+      x %= WIDTH*block_size;
+      y %= HEIGHT*block_size;
+
+      float tx = -((map.scroll.x-map.scroll.px)/4.0);
+      float ty = -((map.scroll.y-map.scroll.py)/4.0);
+      for (int f = 0; f < 3; f++) {
+        tx *= abs(tx);
+        ty *= abs(ty);
+      }
+      tx /= 30;
+      ty /= 30;
+      if (abs(tx) > 1 || abs(ty) > 1) {
+        g.line(x, y, x-tx, y-ty);
+      }
+    }
+    //
+  }
 
   proc_characters();
   draw_characters();
@@ -188,10 +234,12 @@ void draw() {
 
 
   /********** ﾃﾞﾊﾞｯｸﾞ **********/
-  if(frameCount == 1 && DEBUG)debug_window = new debug_window();
+  if (frameCount == 1 && DEBUG)debug_window = new debug_window();
   /**********  ｽｹｰﾗｰ  **********/
   image(get(0, 0, width/SCALE, height/SCALE), 0, 0, width, height);
   //println(map.data.get(0,0),col_list[0]);
-  
+
   yoyu_old = millis();
+
+  if(DEBUG)devtext("TEST MAP "+nf(frameRate, 2, 4), 4, 4);
 }

@@ -89,7 +89,6 @@ class bgdata {
   byte[] save() {
     int l = 0;
     l += width*height*(32/8);//data
-    l += width*height*(32/8);//data_overlay
     byte[] out = new byte[l];
     int i = 0;
     for (int y = 0; y < height; y++) {
@@ -101,18 +100,6 @@ class bgdata {
         out[i] = (byte)(data[x][y]>>8);
         i++;
         out[i] = (byte)(data[x][y]>>0);
-        i++;
-      }
-    }
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < height; x++) {
-        out[i] = (byte)(data_overlay[x][y]>>24);
-        i++;
-        out[i] = (byte)(data_overlay[x][y]>>16);
-        i++;
-        out[i] = (byte)(data_overlay[x][y]>>8);
-        i++;
-        out[i] = (byte)(data_overlay[x][y]>>0);
         i++;
       }
     }
@@ -146,6 +133,7 @@ class bgdata {
 
 class scroller {
   float ix, iy;
+  float px, py;
   float x, y ;
   float xs, ys;
   int w, h;
@@ -164,6 +152,8 @@ class scroller {
     ys = 0;
   }
   void proc() {
+    px = x;
+    py = y;
     x = (ix+(x*4))/5;
     y = (iy+(y*4))/5;
     if (x < 0)x = 0;
@@ -171,6 +161,8 @@ class scroller {
     //if (x < 0)x = 0;
     int my = h*block_size;
     if (y > my)y = my;
+    int mx = w*block_size;
+    if (x > mx)x = mx;
   }
   void go(float a, float b) {
     x = ix = a;
@@ -267,6 +259,14 @@ class background {
     return o;
   }
   void proc() {
+    for (int x = 0; x < data.width; x++) {
+      data.data[x][0] = 0;
+      data.data[x][data.height-1] = 0;
+    }
+    for (int y = 0; y < data.height; y++) {
+      data.data[0][y] = 0;
+      data.data[data.width-1][y] = 0;
+    }
     //
     int scrx = (int)scroll.x/block_size;
     int scry = (int)scroll.y/block_size;
@@ -330,15 +330,15 @@ class background {
     return o;
   }
   PImage get() {
-    return g.get(block_size+int(scroll.x%16), block_size+int(scroll.y%16), DISP_WIDTH *block_size, DISP_HEIGHT *block_size);
+    return g.get(block_size+int(scroll.x%block_size), block_size+int(scroll.y%block_size), DISP_WIDTH *block_size, DISP_HEIGHT *block_size);
   }
   int getxmouse(int x) {
-    int a = int((float)(x+scroll.x+16)/block_size);
+    int a = int((float)(x+scroll.x+block_size)/block_size);
 
     return a;
   }
   int getymouse(int y) {
-    int a = int((float)(y+scroll.y+16)/block_size);
+    int a = int((float)(y+scroll.y+block_size)/block_size);
 
     return a;
   }
@@ -559,7 +559,7 @@ void scroller() {
     hekiny /= smp;
   }
   float x = hekinx-(dwidth/2);
-  float y = hekiny-(dheight/2);
+  float y = hekiny-(dheight/1.25);
   if (dist(map.scroll.x, map.scroll.y, x, y) < dwidth) {
     map.scroll.to(x, y);
   } else {
@@ -599,6 +599,7 @@ void proc_characters() {
 
   for (int i = 0; i < mobs_max; i++) {
     if (mobs[i] != null) {
+      mobs[i].mob_num = i;
       mobs[i].map(map);
       mobs[i].proc();
       if (mobs[i].deadcount > 30 *15) {

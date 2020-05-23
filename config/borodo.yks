@@ -12,7 +12,7 @@ jump < rect(224, 4080,32,8)r # ga-n
 
 jump_level < 2f        # tyouyakuryoku
 speed      < 1f      # kasoku
-speed_div  < 6f      # masatsu
+speed_div  < 2f      # masatsu
 air_div    < 1.1f     # kuuki masatsu
 
 dmg_time < 10f

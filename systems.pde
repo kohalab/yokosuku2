@@ -12,6 +12,16 @@ boolean[] col_list = new boolean[0x10000];
 int[] freedom_list = new int[0];
 boolean[] dead_list = new boolean[0x10000];
 
+boolean[] big_list = new boolean[0x10000];
+boolean[] small_list = new boolean[0x10000];
+
+boolean[] normal_jump_list = new boolean[0x10000];
+
+boolean[] mover_left_list = new boolean[0x10000];
+boolean[] mover_right_list = new boolean[0x10000];
+
+PImage devfont;
+
 void sysbegin() {
   println("[sysbegin] sysbegin start");
   fstbegin();
@@ -21,12 +31,33 @@ void sysbegin() {
 
 String system_config_path = "config/system.yks";
 
+void devtext(String str, int x, int y) {
+  int textsize = 8;
+
+  int nx = x;
+  int ny = y;
+  for (int i = 0; i < str.length(); i++) {
+    char now = str.charAt(i);
+    if (now == '\n') {
+      ny += textsize;
+      nx = x;
+    } else {
+      int p = now&0xff;
+      image(devfont.get((p%16)*textsize, (p/16)*textsize, textsize, textsize), nx, ny);
+      nx += textsize;
+    }
+  }
+}
+
 void fstbegin() {
   println("[fonbegin] fonbegin start");
   println("[fonbegin] loading \""+system_config_path+"\"");
   systemscripts = new yokoscript(system_config_path);
   systemscripts.read();
   //systemscripts.dump();
+
+  devfont = loadImage("imgs/devfont.png");
+
   String fontpath = systemscripts.Strings.get("system_font");
 
   logo_images_path = systemscripts.Strings.get("logo_images");//scene
@@ -58,26 +89,55 @@ void fstbegin() {
   for (int i = 0; i < col_list.length; i++) {
     col_list[i] = true;
     dead_list[i] = false;
+    big_list[i] = false;
+    small_list[i] = false;
+    normal_jump_list[i] = false;
+    mover_left_list[i] = false;
+    mover_right_list[i] = false;
   }
   int type = -1;
   for (int i = 0; i < blockconfig.length; i++) {
     //
     blockconfig[i] = blockconfig[i].replaceAll(" ", "");
+    //println(i+":"+type);
     if (blockconfig[i].length() >= 3) {
       String m = splitTokens(blockconfig[i], ";")[0];
       //println(m);
-      if (m.length() <= 4) {
+      if (m.length() == 4) {
         //
         switch(type) {
         case 0:
           col_list[unhex(m)] = false;
           break;
         case 1:
+          //println("freedom", m);
           freedom_list = append(freedom_list, unhex(m));
           break;
         case 2:
+          //println("dead", m);
           dead_list[unhex(m)] = true;
+          break;
+        case 3:
+          big_list[unhex(m)] = true;
+          break;
+        case 4:
+          //println("small", m);
+          small_list[unhex(m)] = true;
+          break;
+        case 5:
+          //println("small", m);
+          normal_jump_list[unhex(m)] = true;
+          break;
+        case 6:
+          //println("small", m);
+          mover_left_list[unhex(m)] = true;
+          break;
+        case 7:
+          //println("small", m);
+          mover_right_list[unhex(m)] = true;
+          break;
         default:
+
           break;
         }
         //
@@ -86,6 +146,11 @@ void fstbegin() {
         if (m.equals("[nocol]"))type = 0;
         if (m.equals("[freedom]"))type = 1;
         if (m.equals("[dead]"))type = 2;
+        if (m.equals("[bigg]"))type = 3;
+        if (m.equals("[small]"))type = 4;
+        if (m.equals("[normal_jump]"))type = 5;
+        if (m.equals("[mover_left]"))type = 6;
+        if (m.equals("[mover_right]"))type = 7;
         //
       }
       //

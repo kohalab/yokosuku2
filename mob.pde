@@ -2,6 +2,8 @@ class mob {
 
   int num;
 
+  int mob_num;
+
   point[] oldposs;
   point pos;
 
@@ -173,6 +175,8 @@ class mob {
   int disp_kyori;
   float vol;
 
+  float size;
+
   int frameCount;
 
   void proc() {
@@ -185,9 +189,9 @@ class mob {
 
     pos.xs /= script.floats.get("speed_div");
     workxs /= script.floats.get("speed_div");
-    //pos.ys /= script.floats.get("air_div");
-    if (pos.ys > +8)pos.ys = +8;
-    if (pos.ys < -5)pos.ys = -5;
+    pos.ys /= script.floats.get("air_div");
+    if (pos.ys > +15)pos.ys = +15;
+    if (pos.ys < -15)pos.ys = -15;
     //
     if (ai_enable) {
       ai();
@@ -398,6 +402,10 @@ class mob {
       int scry = (int)(pos.y/block_size)-(map.DISP_HEIGHT/2);
       //
 
+
+      int pw = player_width;
+      int ph = player_height;
+
       int e = 0;
       for (int y = 0; y < map.DISP_HEIGHT+2; y++) {
         for (int x = 0; x < map.DISP_WIDTH+2; x++) {
@@ -410,9 +418,6 @@ class mob {
             int n = map.data.data[X][Y];
             int xp = X*block_size-(block_size/2);
             int yp = Y*block_size;
-
-            int pw = player_width;
-            int ph = player_height;
 
             boolean jimen_enable = true;
 
@@ -450,6 +455,8 @@ class mob {
                 //pos.y = yp+(ph/2)+1;
                 asituiteru = 0;
                 col_up = col_len;
+                //
+                //
               }
             } else
               // jimen
@@ -463,6 +470,29 @@ class mob {
                     pos.y = yp-block_size+1;
                     asituiteru = asituiteru_len;
                     col_down = col_len;
+                    if (big_list[n]) {
+                      if (frameCount%5 == 0)size += 0.125;
+                    }
+                    if (small_list[n]) {
+                      if (frameCount%5 == 0)size -= 0.125;
+                    }
+                    if (normal_jump_list[n]) {
+                      pos.ys = -15;
+                      pos.y -= 16;
+                      stop_sound("jmp");
+                      play_sound("jmp", (int)disp_x, vol);
+                    }
+                    if (mover_left_list[n]) {
+                      pos.xs -= 0.25;
+                      //pos.x -= 2;
+                    }
+                    if (mover_right_list[n]) {
+                      pos.xs += 0.25;
+                      //pos.x += 2;
+                    }
+                    if (size > 3)size = 3;
+                    if (size < -0.5)size = -0.5;
+                    //
                   }
                 }
               }
@@ -474,7 +504,7 @@ class mob {
               (int)old.x+(pw/2)+(4), (int)(old.y-(ph)+12) +4, pw/4, ph-8, col_list[n]&&deb
               )) {
               if (col_list[n] ) {
-                pos.y -= 1;
+                pos.x -= 1;
                 pos.xs = -1;
                 col_left = col_len;
               }
@@ -485,7 +515,7 @@ class mob {
               (int)old.x, (int)(old.y-(ph)+12) +4, pw/4, ph-8, col_list[n]&&deb
               )) {
               if (col_list[n] ) {
-                pos.y += 1;
+                pos.x += 1;
                 pos.xs = +1;
                 col_right = col_len;
               }
@@ -519,6 +549,59 @@ class mob {
           }
           //
         }
+      }
+
+      for (int i = 0; i < mobs_max+player_num; i++) {
+        mob now = null;
+        if (i < mobs_max) {
+          now = mobs[i];
+        } else {
+          now = players[i-mobs_max];
+        }
+
+        if (
+          (now != null) &&
+          !now.deaded &&
+          (mob_num != i || i >= mobs_max) &&
+          (num != (i-mobs_max) || i < mobs_max)
+          ) {
+          int xp = (int)now.pos.x;
+          int yp = (int)now.pos.y;
+          int bs_x = now.player_width;
+          int bs_y = now.player_height;
+
+          if (
+            col(xp, yp, bs_x, bs_y, 
+            (int)old.x+(pw/2/2), (int)old.y+(bs_y-4), pw/2, 4, false
+            )) {
+            //pos.ys += -1;
+            pos.y = yp-bs_y+0.1-4;
+
+            //pos.x += now.pos.xs/1.05;
+            //pos.y += now.pos.ys/1.05;
+
+            asituiteru = asituiteru_len;
+            col_down = col_len;
+          }
+          if (
+            col(xp, yp, bs_x, bs_y, 
+            (int)old.x+(pw/2)+(4), (int)(old.y-(ph)+12) +4, pw/4, ph-8, false
+            )) {
+            //pos.x -= 1;
+            pos.xs += -1.5;
+            col_left = col_len;
+          }
+          // ---- right ----
+          if (
+            col(xp, yp, bs_x, bs_y, 
+            (int)old.x, (int)(old.y-(ph)+12) +4, pw/4, ph-8, false
+            )) {
+            //pos.x += 1;
+            pos.xs += +1.5;
+            col_right = col_len;
+          }
+        }
+        //
       }
 
       if (e == 0)dead(dead_soto);
@@ -563,20 +646,22 @@ class mob {
     //if (stopcount > 0)r = script.rects.get("img:stp");
     //println(axs, bxs);
     //if(stopcount > 0)pos.x += ((counter%2)*2);
-    if (control.get("down") > 0.5) {
-      r = script.rects.get("img:sya");
-      if (script.floats.get("sya_anime") != null) {
-        if (wk%2 == 1)r = script.rects.get("img:sya2");
-      }
-    }
 
-    player_width = nowplayer.width;
-    player_height = nowplayer.height;
+    player_width = (int)(nowplayer.width*(size+1));
+    player_height = (int)(nowplayer.height*(size+1));
     if (control.get("down") > 0.5) {
+
+      if (down_count >= 2) {
+        r = script.rects.get("img:sya");
+        if (script.floats.get("sya_anime") != null) {
+          if (wk%2 == 1)r = script.rects.get("img:sya2");
+        }
+      }
+
       if (down_count > 0 && down_count < 2) {
         rect nr = script.rects.get("img:nml");
         rect sr = script.rects.get("img:sya");
-        player_height = (int)aida(nr.h, sr.h, down_count/1.0);
+        player_height = (int)aida(nr.h, sr.h, (down_count)/2f);
       }
     }
 
@@ -585,6 +670,9 @@ class mob {
     disp_x = pos.x-(player_width/2)-map.scroll.x;
     disp_y = pos.y-player_height-map.scroll.y;
     image(nowplayer, disp_x, disp_y, player_width, player_height);
+    noFill();
+    stroke(255, 0, 0);
+    //rect(disp_x, disp_y, player_width, player_height);
     if (stopcount > 0)stopcount--;
     if (deaded && script.floats.get("player") != 0) {
       rect g = script.rects.get("img:gan");

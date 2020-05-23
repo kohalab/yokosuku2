@@ -4,3 +4,13 @@
 0020;
 [dead];
 0040;
+[bigg];
+0048;
+[small];
+0049;
+[normal_jump];
+0058;
+[mover_left];
+0059;
+[mover_right];
+005A;

@@ -10,7 +10,7 @@ img:gan < rect(240, 0,14,12)r # ga-n
 
 jump < rect(224, 4080,32,8)r # ga-n
 
-jump_level < 2f        # tyouyakuryoku
+jump_level < 2.5f        # tyouyakuryoku
 speed      < 2f      # kasoku
 speed_div  < 6f      # masatsu
 air_div    < 1.1f     # kuuki masatsu
