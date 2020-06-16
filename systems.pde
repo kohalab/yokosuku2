@@ -20,6 +20,9 @@ boolean[] normal_jump_list = new boolean[0x10000];
 boolean[] mover_left_list = new boolean[0x10000];
 boolean[] mover_right_list = new boolean[0x10000];
 
+boolean[] jump_left_list = new boolean[0x10000];
+boolean[] jump_right_list = new boolean[0x10000];
+
 PImage devfont;
 
 void sysbegin() {
@@ -31,6 +34,11 @@ void sysbegin() {
 
 String system_config_path = "config/system.yks";
 
+
+PImage getdevchar(int index) {
+  int textsize = 8;
+  return devfont.get((index%16)*textsize, (index/16)*textsize, textsize, textsize);
+}
 void devtext(String str, int x, int y) {
   int textsize = 8;
 
@@ -74,6 +82,32 @@ void fstbegin() {
   println(start_text);
 
   blocks = loadImage(systemscripts.Strings.get("blocks"));
+  int blocks_len = (blocks.width/block_size)*(blocks.height/block_size);
+  for (int i = 0; i < 256; i++) {
+    PImage now = getblock(blocks, i);
+    now.loadPixels();
+    boolean e = true;
+    for (int f = 0; f < now.pixels.length; f++) {
+      if ((now.pixels[f]>>24) != 0)e = false;
+    }
+    if (e) {
+      int x = (i%16)*block_size;
+      int y = (i/16)*block_size;
+      char[] str = new char[4];
+      String index_hex = hex(i, 2);
+      //012
+      //0FF
+      str[0] = (char)(index_hex.charAt(0)+128);
+      str[1] = (char)(index_hex.charAt(1)+128);
+      str[2] = (char)('?'+128);
+      str[3] = (char)('?'+128);
+      //blocks.set(x, y, getblock(blocks, 0x100));
+      blocks.set(x+(block_size/2*0), y+(block_size/2*0), getdevchar(str[0]));
+      blocks.set(x+(block_size/2*1), y+(block_size/2*0), getdevchar(str[1]));
+      blocks.set(x+(block_size/2*0), y+(block_size/2*1), getdevchar(str[2]));
+      blocks.set(x+(block_size/2*1), y+(block_size/2*1), getdevchar(str[3]));
+    }
+  }
 
   print("[fonbegin] loading \""+fontpath+"\"");
   system_font = loadFont(fontpath);
@@ -94,6 +128,8 @@ void fstbegin() {
     normal_jump_list[i] = false;
     mover_left_list[i] = false;
     mover_right_list[i] = false;
+    jump_left_list[i] = false;
+    jump_right_list[i] = false;
   }
   int type = -1;
   for (int i = 0; i < blockconfig.length; i++) {
@@ -136,6 +172,14 @@ void fstbegin() {
           //println("small", m);
           mover_right_list[unhex(m)] = true;
           break;
+        case 8:
+          //println("small", m);
+          jump_left_list[unhex(m)] = true;
+          break;
+        case 9:
+          //println("small", m);
+          jump_right_list[unhex(m)] = true;
+          break;
         default:
 
           break;
@@ -151,6 +195,8 @@ void fstbegin() {
         if (m.equals("[normal_jump]"))type = 5;
         if (m.equals("[mover_left]"))type = 6;
         if (m.equals("[mover_right]"))type = 7;
+        if (m.equals("[jump_left]"))type = 8;
+        if (m.equals("[jump_right]"))type = 9;
         //
       }
       //

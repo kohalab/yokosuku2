@@ -288,8 +288,13 @@ class background {
             //println(n);
             int a = naname_san(data.data, x, y, (data.get(data.data, x, y)));
             if (n == 15) {
-              a += 16;
-              data.data_overlay[x][y] = (((data.get(data.data, x, y)/32)*32)+a);
+              if (a == 0) {
+                a += 16;
+                data.data_overlay[x][y] = 0;
+              } else {
+                a += 16;
+                data.data_overlay[x][y] = (((data.get(data.data, x, y)/32)*32)+a);
+              }
             }
             data.data[x][y] = (((data.get(data.data, x, y)/32)*32)+n);
             //
@@ -365,12 +370,16 @@ PImage[] title_animations;
 PImage mokubox;
 
 void loading_images() {
+  devfont = loadImage("imgs/devfont.png");
   title_animations_frames = int(loadStrings(logo_images_path+"info")[0]);
   title_animations = new PImage[title_animations_frames];
   for (int i = 0; i < title_animations_frames; i++) {
     title_animations[i] = loadImage(logo_images_path+i+".png");
   }
   mokubox = loadImage("imgs/mokubox.png");
+
+  PImage icon = loadImage("imgs/icon_maru.png");
+  surface.setIcon(icon);
 }
 
 void title_start() {

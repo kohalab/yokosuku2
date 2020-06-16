@@ -116,8 +116,10 @@ void maptest() {
         if (random(100) < 3)map.data.set(map.data.data, i, f, 0x48);
         if (random(100) < 3)map.data.set(map.data.data, i, f, 0x49);
         if (random(100) < 3)map.data.set(map.data.data, i, f, 0x58);
-        if (noise(i/8.0, 4821) < 0.3)map.data.set(map.data.data, i, f, 0x59);
-        if (noise(i/8.0, 1230) < 0.3)map.data.set(map.data.data, i, f, 0x5A);
+        if (noise(i/15.0, 1230.0) < 0.3)map.data.set(map.data.data, i, f, 0x59);
+        if (noise(i/15.0, 1230.2) < 0.3)map.data.set(map.data.data, i, f, 0x5A);
+        if (noise(i/4.0, 1230.4) < 0.3)map.data.set(map.data.data, i, f, 0x5B);
+        if (noise(i/4.0, 1230.6) < 0.3)map.data.set(map.data.data, i, f, 0x5C);
       }
       //
     }
@@ -185,7 +187,7 @@ void draw() {
   map.mapdraw();
   image(map.get(), 0, 0);
   //************** test **************//
-  g.strokeWeight(2);
+  g.strokeWeight(1);
   for (int i = 0; i < 100; i++) {
     g.stroke(255);
     float x = noise(i, 36, millis()/100000.0)*WIDTH*3*block_size;
@@ -241,5 +243,6 @@ void draw() {
 
   yoyu_old = millis();
 
-  if(DEBUG)devtext("TEST MAP "+nf(frameRate, 2, 4), 4, 4);
+  if (DEBUG)devtext("TEST MAP "+nf(frameRate, 2, 4), 4, 4);
+  //image(blocks.get(0,0,min(width,blocks.width),min(height,blocks.height)),0,0);
 }

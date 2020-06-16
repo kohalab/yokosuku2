@@ -187,8 +187,16 @@ class mob {
     pos.x += pos.xs;
     pos.y += pos.ys;
 
-    pos.xs /= script.floats.get("speed_div");
-    workxs /= script.floats.get("speed_div");
+    if (oldasituiteru > 0) {
+      pos.xs /= script.floats.get("speed_div");
+    } else {
+      pos.xs /= ((script.floats.get("speed_div")-1)/5)+1;
+    }
+    if (oldasituiteru > 0) {
+      workxs /= script.floats.get("speed_div");
+    } else {
+      workxs /= ((script.floats.get("speed_div")-1)/5)+1;
+    }
     pos.ys /= script.floats.get("air_div");
     if (pos.ys > +15)pos.ys = +15;
     if (pos.ys < -15)pos.ys = -15;
@@ -245,6 +253,7 @@ class mob {
         } else {
           hc_count = 0;
         }
+        //
       }
       //
       deadcount++;
@@ -254,6 +263,7 @@ class mob {
       float s = 1;
       s += control.get("dash")/2;
       s /= control.get("down")*4+1;
+      if(asituiteru <= 0)s /= 2;
       //player
 
       oldasituiteru = newasituiteru;
@@ -488,6 +498,16 @@ class mob {
                     }
                     if (mover_right_list[n]) {
                       pos.xs += 0.25;
+                      //pos.x += 2;
+                    }
+                    if (jump_left_list[n]) {
+                      pos.xs = -15;
+                      pos.ys = -15;
+                      //pos.x -= 2;
+                    }
+                    if (jump_right_list[n]) {
+                      pos.xs = +15;
+                      pos.ys = -15;
                       //pos.x += 2;
                     }
                     if (size > 3)size = 3;
