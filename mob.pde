@@ -263,7 +263,7 @@ class mob {
       float s = 1;
       s += control.get("dash")/2;
       s /= control.get("down")*4+1;
-      if(asituiteru <= 0)s /= 2;
+      if (asituiteru <= 0)s /= 2;
       //player
 
       oldasituiteru = newasituiteru;
@@ -591,11 +591,13 @@ class mob {
           int bs_y = now.player_height;
 
           if (
-            col(xp, yp, bs_x, bs_y, 
+            col(xp, yp, bs_x, bs_y/2, 
             (int)old.x+(pw/2/2), (int)old.y+(bs_y-4), pw/2, 4, false
             )) {
             //pos.ys += -1;
-            pos.y = yp-bs_y+0.1-4;
+            if (pos.y > (yp-bs_y+0.1-4)-2) {
+              pos.y = yp-bs_y+0.1-4;
+            }
 
             //pos.x += now.pos.xs/1.05;
             //pos.y += now.pos.ys/1.05;
@@ -605,19 +607,19 @@ class mob {
           }
           if (
             col(xp, yp, bs_x, bs_y, 
-            (int)old.x+(pw/2)+(4), (int)(old.y-(ph)+12) +4, pw/4, ph-8, false
+            (int)old.x+(pw/2)+(4)-(pw/8), (int)(old.y-(ph)+12) +4, pw/4, ph-8, false
             )) {
             //pos.x -= 1;
-            pos.xs += -1.5;
+            pos.xs += -1.2;
             col_left = col_len;
           }
           // ---- right ----
           if (
             col(xp, yp, bs_x, bs_y, 
-            (int)old.x, (int)(old.y-(ph)+12) +4, pw/4, ph-8, false
+            (int)old.x+2, (int)(old.y-(ph)+12)+(pw/8), pw/4, ph-8, false
             )) {
             //pos.x += 1;
-            pos.xs += +1.5;
+            pos.xs += +1.2;
             col_right = col_len;
           }
         }

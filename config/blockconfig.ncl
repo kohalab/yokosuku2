@@ -14,3 +14,7 @@
 0059;
 [mover_right];
 005A;
+[jump_left];
+005B;
+[jump_right];
+005C;

@@ -5,8 +5,8 @@ img:wk1 < rect(32,64,16,32)r # wk1
 img:wk2 < rect(48,64,16,32)r # wk2
 img:wk0 < rect(64,64,16,32)r # wk0
 img:stp < rect(80,64,16,32)r # stoop
-img:sya < rect(88,99,37,13)r # syagamu
-img:sya2 < rect(88,115,37,13)r # syagamu2
+img:sya < rect(128,67,37,13)r # syagamu
+img:sya2 < rect(128,83,37,13)r # syagamu2
 img:gan < rect(240,64,14,12)r # ga-n
 img:uem < rect(112,64,16,32)r # uemiru
 
