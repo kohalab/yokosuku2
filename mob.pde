@@ -17,6 +17,8 @@ class mob {
 
   boolean ai_enable;
 
+  int score;
+
   PImage nowplayer;
   int player_width = 0;
   int player_height = 0;
@@ -154,6 +156,7 @@ class mob {
       oldposs[i] = startpos;
     }
     pos = startpos.get();
+    score = 0;
   }
 
   int nowjump;
@@ -433,9 +436,9 @@ class mob {
 
             if (
               col(xp, yp, block_size, block_size, 
-              (int)old.x-4, (int)old.y-(ph/2), pw+8, ph+4, col_list[n]&&deb
+              (int)old.x-4, (int)old.y-(ph/2), pw+8, ph+4, check_blockconfig("!col", n)&&deb
               )) {
-              if (dead_list[n]) {
+              if (check_blockconfig("dead", n)) {
                 dead(dead_bloc);
               }
             }
@@ -458,9 +461,9 @@ class mob {
             // up
             if (
               col(xp, yp, block_size, block_size, 
-              (int)old.x+(pw/2/2), (int)old.y-(ph)+8, pw/2, 8, col_list[n]&&deb
+              (int)old.x+(pw/2/2), (int)old.y-(ph)+8, pw/2, 8, check_blockconfig("!col", n)&&deb
               )) {
-              if (col_list[n]) {
+              if (check_blockconfig("!col", n)) {
                 pos.ys = 2;
                 //pos.y = yp+(ph/2)+1;
                 asituiteru = 0;
@@ -473,42 +476,58 @@ class mob {
               if (jimen_enable) {
                 if (
                   col(xp, yp, block_size, block_size, 
-                  (int)old.x+(pw/2/2), (int)old.y+(block_size)-4, pw/2, 4, col_list[n]&&deb
+                  (int)old.x+(pw/2/2), (int)old.y+(block_size)-4, pw/2, 4, check_blockconfig("!col", n)&&deb
                   )) {
-                  if (col_list[n] && nowjump == 0) {
+                  if (check_blockconfig("!col", n) && nowjump == 0) {
                     pos.ys = -0;
                     pos.y = yp-block_size+1;
                     asituiteru = asituiteru_len;
                     col_down = col_len;
-                    if (big_list[n]) {
+                    if (check_blockconfig("big", n)) {
                       if (frameCount%5 == 0)size += 0.125;
                     }
-                    if (small_list[n]) {
+                    if (check_blockconfig("small", n)) {
                       if (frameCount%5 == 0)size -= 0.125;
                     }
-                    if (normal_jump_list[n]) {
+                    if (check_blockconfig("normal_jump", n)) {
                       pos.ys = -15;
                       pos.y -= 16;
                       stop_sound("jmp");
                       play_sound("jmp", (int)disp_x, vol);
                     }
-                    if (mover_left_list[n]) {
+                    if (check_blockconfig("mover_left", n)) {
                       pos.xs -= 0.25;
                       //pos.x -= 2;
                     }
-                    if (mover_right_list[n]) {
+                    if (check_blockconfig("mover_right", n)) {
                       pos.xs += 0.25;
                       //pos.x += 2;
                     }
-                    if (jump_left_list[n]) {
+                    if (check_blockconfig("jump_left", n)) {
                       pos.xs = -15;
                       pos.ys = -15;
                       //pos.x -= 2;
+                      stop_sound("jmp");
+                      play_sound("jmp", (int)disp_x, vol);
                     }
-                    if (jump_right_list[n]) {
+                    if (check_blockconfig("jump_right", n)) {
                       pos.xs = +15;
                       pos.ys = -15;
                       //pos.x += 2;
+                      stop_sound("jmp");
+                      play_sound("jmp", (int)disp_x, vol);
+                    }
+                    if (check_blockconfig("score100", n)) {
+                      score += 100;
+                    }
+                    if (check_blockconfig("score10", n)) {
+                      score += 10;
+                    }
+                    if (check_blockconfig("score1", n)) {
+                      score += 1;
+                    }
+                    if (check_blockconfig("score01", n)) {
+                      if (frameCount%10 == 0)score += 1;
                     }
                     if (size > 3)size = 3;
                     if (size < -0.5)size = -0.5;
@@ -521,9 +540,9 @@ class mob {
             // ---- left ----
             if (
               col(xp, yp, block_size, block_size, 
-              (int)old.x+(pw/2)+(4), (int)(old.y-(ph)+12) +4, pw/4, ph-8, col_list[n]&&deb
+              (int)old.x+(pw/2)+(4), (int)(old.y-(ph)+12) +4, pw/4, ph-8, check_blockconfig("!col", n)&&deb
               )) {
-              if (col_list[n] ) {
+              if (check_blockconfig("!col", n) ) {
                 pos.x -= 1;
                 pos.xs = -1;
                 col_left = col_len;
@@ -532,9 +551,9 @@ class mob {
             // ---- right ----
             if (
               col(xp, yp, block_size, block_size, 
-              (int)old.x, (int)(old.y-(ph)+12) +4, pw/4, ph-8, col_list[n]&&deb
+              (int)old.x, (int)(old.y-(ph)+12) +4, pw/4, ph-8, check_blockconfig("!col", n)&&deb
               )) {
-              if (col_list[n] ) {
+              if (check_blockconfig("!col", n)) {
                 pos.x += 1;
                 pos.xs = +1;
                 col_right = col_len;
@@ -696,12 +715,35 @@ class mob {
     stroke(255, 0, 0);
     //rect(disp_x, disp_y, player_width, player_height);
     if (stopcount > 0)stopcount--;
-    if (deaded && script.floats.get("player") != 0) {
-      rect g = script.rects.get("img:gan");
-      if (disp_x >= -g.w && disp_y >= -g.h && disp_x < dwidth && disp_y < dheight) {
-        rect j = script.rects.get("jump");
-        image(get(blocks, j), num*(g.w*2), dheight-(g.h*2)-j.h);
-        image(get(img, g), num*(g.w*2), dheight-(g.h*2), g.w*2, g.h*2);
+    if (script.floats.get("player") != 0) {
+      if (deaded) {
+        //dead
+        rect g = script.rects.get("img:gan");
+        if (disp_x >= -g.w && disp_y >= -g.h && disp_x < dwidth && disp_y < dheight) {
+          rect j = script.rects.get("jump");
+          image(get(blocks, j), num*(g.w*2), dheight-(g.h*2)-j.h);
+          image(get(img, g), num*(g.w*2), dheight-(g.h*2), g.w*2, g.h*2);
+        }
+        //
+      } else {
+        //alive
+        rect playr = systemscripts.rects.get("text_img:player");
+        image(get(text_image, playr), ((num+0.5)*dwidth/playerscripts.length)-(playr.w/2), dheight-(playr.h*6), playr.w, playr.h);
+        rect scre = systemscripts.rects.get("text_img:score");
+        image(get(text_image, scre), ((num+0.5)*dwidth/playerscripts.length)-(scre.w/2), dheight-(scre.h*5), scre.w, scre.h);
+        int keta_num = 6;
+        rect zero = systemscripts.rects.get("text_img:zero");
+        rect now = null;
+
+        now = new rect(zero.x, zero.y, zero.w, zero.h);
+        now.x += (int)(num%10)*now.w;
+        image(get(text_image, now), ((num+0.5)*dwidth/playerscripts.length)-(playr.w/2)+playr.w, dheight-(playr.h*6), zero.w, zero.h);
+        for (int i = 0; i < keta_num; i++) {
+          now = new rect(zero.x, zero.y, zero.w, zero.h);
+          now.x += (int)((score/pow(10, keta_num-1-i))%10)*now.w;
+          image(get(text_image, now), ((num+0.5)*dwidth/playerscripts.length)-(keta_num*zero.w/2)+(i*zero.w), dheight-(scre.h*4), zero.w, zero.h);
+        }
+        //
       }
     }
   }
@@ -719,6 +761,7 @@ class mob {
     if (script.floats.get("deadnull") != null) {
       pos.ys = 10000;
     }
+    size = 0;
   }
 
   void respawn() {

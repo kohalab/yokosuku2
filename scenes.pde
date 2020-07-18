@@ -277,7 +277,8 @@ class background {
         }
       }
     }
-    for (int i = 0; i < freedom_list.length; i++) {
+    int[] freedom_list = blockconfig.get("freedom");
+    for (int i = 0; i <  freedom_list.length; i++) {
       //
       int t1 = freedom_list[i];
       for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {

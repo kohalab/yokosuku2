@@ -7,23 +7,31 @@ int block_size;
 color ERROR_COLOR = color(255, 0, 0);
 
 PImage blocks;
-
+/*
 boolean[] col_list = new boolean[0x10000];
-int[] freedom_list = new int[0];
-boolean[] dead_list = new boolean[0x10000];
-
-boolean[] big_list = new boolean[0x10000];
-boolean[] small_list = new boolean[0x10000];
-
-boolean[] normal_jump_list = new boolean[0x10000];
-
-boolean[] mover_left_list = new boolean[0x10000];
-boolean[] mover_right_list = new boolean[0x10000];
-
-boolean[] jump_left_list = new boolean[0x10000];
-boolean[] jump_right_list = new boolean[0x10000];
+ int[] freedom_list = new int[0];
+ boolean[] dead_list = new boolean[0x10000];
+ 
+ boolean[] big_list = new boolean[0x10000];
+ boolean[] small_list = new boolean[0x10000];
+ 
+ boolean[] normal_jump_list = new boolean[0x10000];
+ 
+ boolean[] mover_left_list = new boolean[0x10000];
+ boolean[] mover_right_list = new boolean[0x10000];
+ 
+ boolean[] jump_left_list = new boolean[0x10000];
+ boolean[] jump_right_list = new boolean[0x10000];
+ 
+ boolean[] score01_list = new boolean[0x10000];
+ boolean[] score1_list = new boolean[0x10000];
+ boolean[] score10_list = new boolean[0x10000];
+ boolean[] score100_list = new boolean[0x10000];
+ */
+HashMap <String, int[]>blockconfig = new HashMap<String, int[]>();
 
 PImage devfont;
+PImage text_image;
 
 void sysbegin() {
   println("[sysbegin] sysbegin start");
@@ -65,6 +73,7 @@ void fstbegin() {
   //systemscripts.dump();
 
   devfont = loadImage("imgs/devfont.png");
+  text_image = loadImage(systemscripts.Strings.get("text_img_path"));
 
   String fontpath = systemscripts.Strings.get("system_font");
 
@@ -118,85 +127,36 @@ void fstbegin() {
   //
   println("[fonbegin] fonbegin end");
 
-  String[] blockconfig = loadStrings("config/blockconfig.ncl");
-  freedom_list = new int[0];
-  for (int i = 0; i < col_list.length; i++) {
-    col_list[i] = true;
-    dead_list[i] = false;
-    big_list[i] = false;
-    small_list[i] = false;
-    normal_jump_list[i] = false;
-    mover_left_list[i] = false;
-    mover_right_list[i] = false;
-    jump_left_list[i] = false;
-    jump_right_list[i] = false;
-  }
-  int type = -1;
-  for (int i = 0; i < blockconfig.length; i++) {
+  String[] blockconfig_in = loadStrings("config/blockconfig.ncl");
+
+  String now_label = "";
+
+  for (int i = 0; i < blockconfig_in.length; i++) {
     //
-    blockconfig[i] = blockconfig[i].replaceAll(" ", "");
+    blockconfig_in[i] = blockconfig_in[i].replaceAll(" ", "");
     //println(i+":"+type);
-    if (blockconfig[i].length() >= 3) {
-      String m = splitTokens(blockconfig[i], ";")[0];
+    if (blockconfig_in[i].length() >= 3) {
+      String m = splitTokens(blockconfig_in[i], ";")[0];
       //println(m);
       if (m.length() == 4) {
-        //
-        switch(type) {
-        case 0:
-          col_list[unhex(m)] = false;
-          break;
-        case 1:
-          //println("freedom", m);
-          freedom_list = append(freedom_list, unhex(m));
-          break;
-        case 2:
-          //println("dead", m);
-          dead_list[unhex(m)] = true;
-          break;
-        case 3:
-          big_list[unhex(m)] = true;
-          break;
-        case 4:
-          //println("small", m);
-          small_list[unhex(m)] = true;
-          break;
-        case 5:
-          //println("small", m);
-          normal_jump_list[unhex(m)] = true;
-          break;
-        case 6:
-          //println("small", m);
-          mover_left_list[unhex(m)] = true;
-          break;
-        case 7:
-          //println("small", m);
-          mover_right_list[unhex(m)] = true;
-          break;
-        case 8:
-          //println("small", m);
-          jump_left_list[unhex(m)] = true;
-          break;
-        case 9:
-          //println("small", m);
-          jump_right_list[unhex(m)] = true;
-          break;
-        default:
-
-          break;
+        int[] old = blockconfig.get(now_label);
+        int len = 0;
+        if (old != null) {
+          len = old.length;
         }
-        //
+        int[] newone = new int[len+1];
+        for (int c = 0; c < len; c++) {
+          newone[c] = old[c];
+        }
+        int id = unhex(m);
+        newone[len] = id;
+        blockconfig.put(now_label, newone);
+        println("blockconfig "+now_label+" += "+id);
       } else {
         //
-        if (m.equals("[nocol]"))type = 0;
-        if (m.equals("[freedom]"))type = 1;
-        if (m.equals("[dead]"))type = 2;
-        if (m.equals("[bigg]"))type = 3;
-        if (m.equals("[small]"))type = 4;
-        if (m.equals("[normal_jump]"))type = 5;
-        if (m.equals("[mover_left]"))type = 6;
-        if (m.equals("[mover_right]"))type = 7;
-        if (m.equals("[jump_left]"))type = 8;
-        if (m.equals("[jump_right]"))type = 9;
+        now_label = m;
+        now_label = now_label.replaceAll("\\[", "");
+        now_label = now_label.replaceAll("\\]", "");
         //
       }
       //
@@ -204,6 +164,25 @@ void fstbegin() {
     //
   }
 }
+
+boolean check_blockconfig(String name, int id) {
+  int[] list = blockconfig.get(name);
+  boolean e = false;//なかったとき
+  if(name.indexOf("!") != -1){
+    e = true;
+  }
+  if (list != null) {
+    for (int i = 0; i < list.length; i++) {
+      if (list[i] == id) {
+        return !e;//見つかった！！
+      }
+    }
+  }else{
+    //println("\""+name+"\"は見つかりません");
+  }
+  return e;
+}
+
 
 boolean[] keys = new boolean[0xffff];
 
