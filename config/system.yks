@@ -22,6 +22,11 @@ blocks < "imgs/blocks.png"s
 start_text < "START"s
 reset_text < "PRESS$sSPACE"s
 
+text_img_path < "imgs/text.png"s
+text_img:score < rect(0,0,40,16)r
+text_img:player < rect(40,0,48,16)r
+text_img:zero < rect(0,16,8,16)r
+
 img:lost < rect(0,3984,151,32)r
 
 sound_path < "sound/"s

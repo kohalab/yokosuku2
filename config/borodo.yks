@@ -2,7 +2,7 @@ img < "imgs/chas.png"s            # img
 img:nml < rect(0  ,64 ,16,16)r # nml
 img:ago < rect(0  ,64 ,16,16)r # ago
 img:wk1 < rect(32 ,64 ,16,16)r # wk1
-img:wk2 < rect(48 ,64 ,16,16)r # wk2
+img:wk2 < rect(32 ,64 ,16,16)r # wk1
 img:wk0 < rect(16  ,64 ,16,16)r # wk0
 img:stp < rect(0  ,64 ,16,16)r # stoop
 img:sya < rect(0  ,64 ,16,16)r # syagamu
