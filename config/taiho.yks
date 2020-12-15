@@ -1,3 +1,5 @@
+name < "taiho"s
+
 img < "imgs/chas.png"s            # img
 img:nml < rect(0  ,96  ,16,16)r # nml
 img:ago < rect(0  ,96  ,16,16)r # ago

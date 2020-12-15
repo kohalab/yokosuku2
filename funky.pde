@@ -196,9 +196,6 @@ boolean imgbox(PImage img, int x, int y, int w, int h) {
   return (x < mousex && y < mousey && x+w > mousex && y+h > mousey);
 }
 
-int status_title = 0;
-int status_edit = 1;
-int status_play = 2;
 
 boolean col(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2, boolean d) {
   boolean f = (x2 < (x1+w1)) && (x1 < (x2+w2)) && (y2 < (y1+h1)) && (y1 < (y2+h2));
@@ -208,9 +205,9 @@ boolean col(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2, bool
     stroke(255, 0, 0);
     if (f)stroke(255, 127, 0);
     rect(x1-block_size/2, y1-block_size, w1, h1);
-    
+
     stroke(0, 0, 255);
-    if (f)stroke(0, 127, 255,64);
+    if (f)stroke(0, 127, 255, 64);
     rect(x2-block_size/2, y2-block_size, w2, h2);
   }
   return f;
@@ -245,4 +242,41 @@ boolean getalpha(PImage in, int x, int y) {
   } else {
     return false;
   }
+}
+
+PImage alpha_mask(PImage rgb, PImage alpha) {
+  rgb.loadPixels();
+  alpha.loadPixels();
+  for (int i = 0; i < min(rgb.pixels.length, alpha.pixels.length); i++) {
+    rgb.pixels[i] = (rgb.pixels[i] & 0x00ffffff) | (alpha.pixels[i] & 0xff000000);
+  }
+  rgb.updatePixels();
+  return rgb;
+}
+
+PGraphics scale_temp;
+
+PImage scaling(PImage in, int w, int h) {
+  if (w < 1)w = 1;
+  if (h < 1)h = 1;
+  if ((scale_temp == null) || (scale_temp.width != w || scale_temp.height != h)) {
+    scale_temp = createGraphics(w, h);
+  }
+  scale_temp.beginDraw();
+  scale_temp.clear();
+  scale_temp.image(in, 0, 0, w, h);
+  scale_temp.endDraw();
+  return scale_temp.get();
+}
+
+boolean get_bit(int in, int bit) {
+  return ( ((in >> bit) & 1) != 0 );
+}
+
+int set_bit(int in, int bit, boolean n) {
+  in &= ~(1 << bit);
+  if (n) {
+    in |= 1 << bit;
+  }
+  return in;
 }

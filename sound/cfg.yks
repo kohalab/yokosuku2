@@ -2,3 +2,4 @@ do_length < 5f
 po_length < 5f
 flash_length < 3f
 hc_length < 4f
+walk_length < 4f

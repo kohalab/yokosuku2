@@ -1,0 +1,36 @@
+name < "bom"s
+
+img < "imgs/chas.png"s            # img
+img:nml < rect(0  ,200 ,16, 16)r # nml
+img:ago < rect(16 ,200 ,16, 16)r # ago
+img:wk1 < rect(16 ,200 ,16, 16)r # wk1
+img:wk2 < rect(32 ,200 ,16, 16)r # wk2
+img:wk0 < rect(0  ,200 ,16, 16)r # wk0
+img:stp < rect(16 ,200 ,16, 16)r # stoop
+img:sya < rect(16 ,200 ,16, 16)r # syagamu
+img:gan < rect(16 ,200 ,16, 16)r # ga-n
+
+jump < rect(0 ,200 ,16, 16)r # ga-n
+
+jump_level < 0f        # tyouyakuryoku
+speed      < 10f      # kasoku
+speed_div  < 9999f      # masatsu
+air_div    < 9999f     # kuuki masatsu
+
+dmg_time < 10f
+dmg      < 0f
+ago_time < 60f
+ago      < 4f
+
+ai:enable < 1f
+ai:type < 806f
+
+player   < 0f
+
+gravity < 0f
+
+collision < 1f
+
+age < 4f
+nodeadsound < 1f
+deadnull < 1f

@@ -1,136 +1,3 @@
-/*                      bg                      */
-
-class bgdata {
-  int[][] olddata;
-  int[][] tmpdata;
-  int[][] data;
-  int[][] data_overlay;
-  int[][] olddata_overlay;
-
-  int width, height;
-
-  /*
-  
-   ** data **
-   
-   31      24 23      16 15      8  7       0
-   |       |  |       |  |       |  |       |
-   [cccc cccc][bbbb aaVH][mmmm mmmm][mmmm mmmm]
-   
-   m = map [7:0]
-   H = H-Flip ( 0 = LEFT  |  1 = RIGHT )
-   V = V-Flip ( 0 = NOMAL |  1 = VFLIP ) (???)
-   a = cfg0 [1:0]
-   b = speed[3:0]
-   c = cfg2 [7:0]
-   
-   */
-
-  int get_map(int in) {
-    return in&0xffff;
-  }
-  boolean get_h(int in) {
-    return ((in>>16)&1) == 1;
-  }
-  boolean get_v(int in) {
-    return ((in>>17)&1) == 1;
-  }
-  int get_a(int in) {
-    return ((in>>18)&3);
-  }
-  int get_speed(int in) {
-    return ((in>>20)&15);
-  }
-  int get_c(int in) {
-    return ((in>>24)&0xff);
-  }
-
-  int set_map(int in, int a) {
-    in &= 0xffff0000;
-    in |= a;
-    return in;
-  }
-  int set_h(int in, boolean a) {
-    in &= ~(1<<16);
-    if (a)in |= (1<<16);
-    return in;
-  }
-  int set_v(int in, boolean a) {
-    in &= ~(1<<17);
-    if (a)in |= (1<<17);
-    return in;
-  }
-  int set_a(int in, int a) {
-    in &= ~((1<<18)|(1<<19));
-    in |= a<<18;
-    return in;
-  }
-  int set_speed(int in, int a) {
-    in &= 0xff0fffff;
-    in |= a<<20;
-    return in;
-  }
-  int set_c(int in, int a) {
-    in &= 0x00ffffff;
-    in |= a<<24;
-    return in;
-  }
-
-  void begin(int w, int h, int dw, int dh) {
-    data = new int[w][h];
-    data_overlay = new int[w][h];
-    olddata_overlay = new int[w][h];
-    tmpdata = new int[w][h];
-    olddata = new int[w][h];
-    width  = w;
-    height = h;
-  }
-
-  byte[] save() {
-    int l = 0;
-    l += width*height*(32/8);//data
-    byte[] out = new byte[l];
-    int i = 0;
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < height; x++) {
-        out[i] = (byte)(data[x][y]>>24);
-        i++;
-        out[i] = (byte)(data[x][y]>>16);
-        i++;
-        out[i] = (byte)(data[x][y]>>8);
-        i++;
-        out[i] = (byte)(data[x][y]>>0);
-        i++;
-      }
-    }
-    return out;
-  }
-
-  int[][] all_set(int[][] in, int s) {
-    int[][] out = new int[in.length][in[0].length];
-    for (int f = 0; f < in[0].length; f++) {
-      for (int i = 0; i < in.length; i++) {
-        out[i][f] = s;
-      }
-    }
-    return out;
-  }
-  void set(int[][] in, int x, int y, int d) {
-    if (x >= 0 && y >= 0 && x < in.length && y < in[0].length) {
-      data[x][y] = d;
-    }
-  }
-  int get(int[][] in, int x, int y) {
-    if (x >= 0 && y >= 0 && x < in.length && y < in[0].length) {
-      return data[x][y];
-    } else {
-      return -1;
-    }
-  }
-}
-
-/* ################################################ scroller ################################################ */
-
 class scroller {
   float ix, iy;
   float px, py;
@@ -179,7 +46,7 @@ class scroller {
 /* ############################################### background ############################################### */
 
 class background {
-  bgdata data;
+  background_data data;
   scroller scroll;
 
   int DISP_WIDTH;
@@ -191,7 +58,7 @@ class background {
   PGraphics g;
 
   background(int W, int H) {
-    data = new bgdata();
+    data = new background_data();
     resize(W, H);
     scroll = new scroller(0, 0);
   }
@@ -206,7 +73,7 @@ class background {
   }
   void begin(int a, int b) {
     map.data.begin(a, b, DISP_WIDTH, DISP_HEIGHT);
-    map.data.olddata = map.data.all_set(map.data.olddata, 0xffffffff);
+    map.data.old_data = map.data.all_set(map.data.old_data, 0xffffffff);
     MAP_WIDTH = a;
     MAP_HEIGHT = b;
     scroll.wh(a-DISP_WIDTH-2, b-DISP_HEIGHT-2);
@@ -224,16 +91,25 @@ class background {
         int Y = y+scry;
         if (X >= 0 && Y >= 0 && X < data.width && Y < data.height) {
           //dr
-          if (data.data[X][Y] != data.olddata[x][y] || data.data_overlay[X][Y] != data.olddata_overlay[x][y] || hazi != 0) {
+          if (
+            data.data[X][Y] != data.old_data[x][y] ||
+            data.overlay_data[X][Y] != data.old_overlay_data[x][y] ||
+            data.background_data[X][Y] != data.old_background_data[x][y] ||
+            hazi != 0) {
             g.image(getblock(blocks, 0), x*block_size, y*block_size);
-            int n = data.data[X][Y];
-            g.image(getblock(blocks, n), x*block_size, y*block_size);
+            int bn = (data.background_data[X][Y] & data.index_mask);
+            g.image(getblock(blocks, bn), x*block_size, y*block_size);
+            int n = (data.data[X][Y] & data.index_mask);
+            if (n != 0) {
+              g.image(getblock(blocks, n), x*block_size, y*block_size);
+            }
             //println(x,y);
-            int a = data.data_overlay[X][Y];
+            int a = data.overlay_data[X][Y];
             if (a > 0)g.image(getblock(blocks, a), x*block_size, y*block_size);
 
-            data.olddata[x][y] = data.data[X][Y];
-            data.olddata_overlay[x][y] = data.data_overlay[X][Y];
+            data.old_data[x][y] = data.data[X][Y];
+            data.old_overlay_data[x][y] = data.overlay_data[X][Y];
+            data.old_background_data[x][y] = data.background_data[X][Y];
           }
         } else {
           hazi = 2;
@@ -273,7 +149,7 @@ class background {
     for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {
       for (int x = scrx-2; x < scrx+2+DISP_WIDTH; x++) {
         if (x >= 0 && y >= 0 && x < data.width && y < data.height) {
-          data.data_overlay[x][y] = 0;
+          data.overlay_data[x][y] = 0;
         }
       }
     }
@@ -291,10 +167,10 @@ class background {
             if (n == 15) {
               if (a == 0) {
                 a += 16;
-                data.data_overlay[x][y] = 0;
+                data.overlay_data[x][y] = 0;
               } else {
                 a += 16;
-                data.data_overlay[x][y] = (((data.get(data.data, x, y)/32)*32)+a);
+                data.overlay_data[x][y] = (((data.get(data.data, x, y)/32)*32)+a);
               }
             }
             data.data[x][y] = (((data.get(data.data, x, y)/32)*32)+n);
@@ -383,21 +259,13 @@ void loading_images() {
   surface.setIcon(icon);
 }
 
-void title_start() {
-  title_position_x_default = dwidth/2;
-  title_position_y_default = dheight/4;
-  title_position_x = title_position_x_default;
-  title_position_y = title_position_y_default;
-  title_r = 0;
-  title_rn = 0;
-  title_ro = 0;
-}
 
 color background_color = #bbeeff;
 
 void simple_background() {
   background(background_color);
 }
+
 
 int title_position_x_default;
 int title_position_y_default;
@@ -412,6 +280,22 @@ float title_ro = 0;
 int title_random;
 
 int title_move_random = 8;
+
+int title_fit_x;
+int title_fit_y;
+
+void title_start() {
+  title_position_x_default = dwidth/2;
+  title_position_y_default = dheight/4;
+  title_position_x = title_position_x_default;
+  title_position_y = title_position_y_default;
+  title_r = 0;
+  title_rn = 0;
+  title_ro = 0;
+  title_fit_x = 2;
+  title_fit_y = 2;
+}
+
 
 void title() {
 
@@ -488,6 +372,23 @@ void title() {
     s /= ( (s >= 0?s:-s) /40.0)+1;
     title_r += s;
   }
+
+  if (round(title_position_x) == round(title_position_x_default)) {
+    if (title_fit_x < 1) {
+      play_sound("dogon", dwidth/2, -12);
+      title_fit_x++;
+    }
+  } else {
+    title_fit_x = 0;
+  }
+  if (round(title_position_y) == round(title_position_y_default)) {
+    if (title_fit_y < 1) {
+      play_sound("dogon", dwidth/2, -12);
+      title_fit_y++;
+    }
+  } else {
+    title_fit_y = 0;
+  }
 }
 
 /*-------------------start-------------------*/
@@ -506,42 +407,155 @@ boolean start_button() {
   if (a)fill(#ffffff);
   text(start_text, x, y-10);
   if (a&&mousePressed) {
-    status = status_edit;
+    play_sound("click", dwidth/2, 0);
+    status = status_s.edit;
   }
   return a&&mousePressed;
 }
 
 /* ############################################### editor ############################################### */
 
+float menu_blocks_scroll = 0;
+int menu_blocks_length = 256;
+int editor_selected_block = 0;
+void draw_menu() {
+  noStroke();
+  fill(240);
+  rect(0, dheight, dwidth, (menu_height/8));
+  fill(250);
+  rect(0, dheight+(menu_height/8), dwidth, menu_height-(menu_height/8));
+  stroke(250);
+  line(0, dheight, dwidth, dheight);
+  stroke(200);
+  line(0, dheight+1, dwidth, dheight+1);
+  int w = (block_size*3)*2/2;
+  int h = menu_height;
+  int n = dwidth/w;
+
+  int scr = Math.round(menu_blocks_scroll*100);
+  int x_count = 0;
+
+  menu_blocks_length = 0;
+  for (int i = 0; i < 256; i++) {
+    if (!check_blockconfig("hidden", i)) {
+      menu_blocks_length++;
+    }
+  }
+  int[] exist_block_list = new int[menu_blocks_length];
+  int block_index_counter = 0;
+  for (int i = 0; i < 256; i++) {
+    if (!check_blockconfig("hidden", i)) {
+      exist_block_list[block_index_counter] = i;
+      block_index_counter++;
+    }
+  }
+
+  for (int i = 0; i < menu_blocks_length; i++) {
+    int index = i+(scr/100);
+    //index &= 0xff;
+    if (index < menu_blocks_length) {
+      PImage img = getblock(blocks, exist_block_list[index]);
+      int x = (i*w)-((scr%100)*w/100);
+      int y = dheight;
+
+      int dx = x+(w/2)-(img.width*2/2);
+      int dy = y+(h/2)-(img.height*2/2);
+      int dw = img.width*2;
+      int dh = img.height*2;
+
+      if (-block_size < dx && dx < dwidth) {
+        if (!check_blockconfig("hidden", exist_block_list[index])) {
+          noStroke();
+          fill(240);
+          rect(dx, dy, dw, dh);
+          if (exist_block_list[index] == editor_selected_block) {
+            strokeWeight(2);
+            stroke(0, 128);
+            fill(255);
+            rect(dx-4, dy-4, dw+8, dh+8);
+            noStroke();
+          }
+          tint(0, 64);
+          image(img, dx+3, dy+3, dw, dh);
+          noTint();
+          image(img, dx, dy, dw, dh);
+          if (col(dx, dy, dw, dh, mouseX, mouseY)) {
+            if (mousePressed) {
+              editor_selected_block = exist_block_list[index];
+            }
+            noStroke();
+            fill(255, 128);
+            rect(dx, dy, dw, dh);
+          }
+        }
+      }
+      /*
+    noFill();
+       stroke(255, 0, 0);
+       rect(dx, dy, dw, dh);
+       */
+    }
+  }
+  menu_blocks_length = block_index_counter;
+  //println("menu_blocks_length:"+menu_blocks_length);
+}
+
+float menu_blocks_scroll_naibu;
+
+void proc_menu() {
+  int w = (block_size*3)*2/2;
+  int n = dwidth/w;
+  //mouse_wheel
+  float smooth = 2;
+  menu_blocks_scroll = (menu_blocks_scroll_naibu + (menu_blocks_scroll*smooth))/(smooth+1);
+
+  menu_blocks_scroll_naibu += mouse_wheel;
+  if (menu_blocks_scroll_naibu > (menu_blocks_length-1)-n+1)menu_blocks_scroll_naibu = (menu_blocks_length-1)-n+1;
+  if (menu_blocks_scroll_naibu < 0)menu_blocks_scroll_naibu = 0;
+
+  if (mouseY >= dheight) {
+    int xs = pmouseX - mouseX;
+    if (mousePressed) {
+      menu_blocks_scroll_naibu += (float)xs / w;
+    }
+  }
+
+  menu_blocks_scroll_naibu = (round(menu_blocks_scroll_naibu) + menu_blocks_scroll_naibu * 50) / 51;
+}
+
 void editor() {
-  int x = map.getxmouse(mousex);
-  int y = map.getymouse(mousey);
-  if (mousePressed) {
-    int n = 0x30;
-    int c = 0;
-    if (mouseButton == LEFT) {
-      if (map.data.get(map.data.data, x, y) != n) {
-        map.data.set(map.data.data, x, y, n);
-        c = 1;
+  //setti
+  if (mouseX >= 0 && mouseY >= 0 &&
+    mouseX < dwidth && mouseY < dheight) {
+    int x = map.getxmouse(mousex);
+    int y = map.getymouse(mousey);
+    if (mousePressed) {
+      int n = editor_selected_block;
+      int c = 0;
+      if (mouseButton == LEFT) {
+        if (map.data.get(map.data.data, x, y) != n) {
+          map.data.set(map.data.data, x, y, n);
+          c = 1;
+        }
       }
-    }
-    if (mouseButton == RIGHT) {
-      n = 0;
-      if (map.data.get(map.data.data, x, y) != n) {
-        map.data.set(map.data.data, x, y, n);
-        c = -1;
+      if (mouseButton == RIGHT) {
+        n = 0;
+        if (map.data.get(map.data.data, x, y) != n) {
+          map.data.set(map.data.data, x, y, n);
+          c = -1;
+        }
       }
+      //
+      if (c != 0) {
+        String t = "";
+        if (c > 0)t = "do";
+        if (c < 0)t = "po";
+        int f = int(random(0, soundscripts.floats.get(t+"_length")));
+        stop_sound(t+f);
+        play_sound(t+f, mousex, 0);
+      }
+      //
     }
-    //
-    if (c != 0) {
-      String t = "";
-      if (c > 0)t = "do";
-      if (c < 0)t = "po";
-      int f = int(random(0, soundscripts.floats.get(t+"_length")));
-      stop_sound(t+f);
-      play_sound(t+f, mousex, 0);
-    }
-    //
   }
 }
 
@@ -555,13 +569,16 @@ void scroller() {
   int smp = 0;
   nokori = 0;
   for (int i = 0; i < player_num; i++) {
-    if (!players[i].deaded) {
-      hekinx += players[i].pos.x;
-      hekiny += players[i].pos.y;
-      smp++;
-      nokori++;
-    } else {
-      //println("player"+i+" : dead");
+    int index = find_mobs_by_name(mobs, "player"+i);
+    if (index >= 0) {
+      if (!mobs[index].deaded) {
+        hekinx += mobs[index].pos.x;
+        hekiny += mobs[index].pos.y;
+        smp++;
+        nokori++;
+      } else {
+        //println("player"+i+" : dead");
+      }
     }
   }
   if (smp > 0) {
@@ -601,20 +618,25 @@ void debuger() {
 /* ########################################## draw_characters ########################################## */
 
 void proc_characters() {
+  /*
   for (int i = 0; i < player_num; i++) {
-    players[i].map(map);
-    players[i].proc();
-    players[i].ctrl(keys);
-  }
-
+   int index = find_mobs_by_name(mobs, "player"+i);
+   mobs[index].map(map);
+   mobs[index].proc();
+   mobs[index].ctrl(keys);
+   }
+   */
   for (int i = 0; i < mobs_max; i++) {
     if (mobs[i] != null) {
       mobs[i].mob_num = i;
       mobs[i].map(map);
       mobs[i].proc();
+      mobs[i].ctrl(keys);
+      /*
       if (mobs[i].deadcount > 30 *15) {
-        mobs[i] = null;
-      }
+       mobs[i] = null;
+       }
+       */
     }
   }
 }
@@ -622,9 +644,6 @@ void proc_characters() {
 int mob_used;
 
 void draw_characters() {
-  for (int i = 0; i < player_num; i++) {
-    players[i].draw();
-  }
   int mb = 0;
   for (int i = 0; i < mobs_max; i++) {
     if (mobs[i] != null) {

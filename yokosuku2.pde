@@ -7,24 +7,28 @@ boolean DEBUG;
 int dwidth;
 int dheight;
 
-int status;
-/*
-  0 = title
- 1 = edit
- 2 = play
- */
+int menu_height = 48;
+
+enum status_s {
+  title, 
+    edit, 
+    play
+}
+
+status_s status;
 
 debug_window debug_window;
 
 int right_control_width = 0;
 
 void settings() {
+  status = status_s.title;
   //noiseSeed(34);
   sysbegin();
   noSmooth();
   dwidth = WIDTH*block_size;
   dheight = HEIGHT*block_size;
-  size(dwidth*SCALE+right_control_width, dheight*SCALE);
+  size(dwidth*SCALE+right_control_width, dheight + menu_height *SCALE);
   noiseDetail(6);
 }
 
@@ -33,7 +37,6 @@ float fr;
 int player_num = 3;
 
 int mobs_max;
-mob[] players = new mob[player_num];
 mob[] mobs;
 
 int yoyu_old;
@@ -46,22 +49,89 @@ void setup() {
   frameRate(30);
   playerreset();
   maptest();
+  kaisiiti();
   soundbegin();
 }
 
 void playerreset() {
   for (int i = 0; i < player_num; i++) {
-    players[i] = new mob(0, 0);
-    players[i].script(playerscripts[i]);
-    players[i].loads();
-    players[i].num(i);
-    if (i != 0)players[i].deaded = true;
+    mob mob = new mob(0, 0);
+    mob.script(characters.get("player"+i));
+    mob.loads();
+    mob.num(i);
+    println("[playerreset] "+mob.name);
+    if (i != 0)mob.deaded = true;
+    new_mobs(mob);
   }
 }
 
 void maptest() {
   noiseSeed(int(random(-999999, 999999)));
   //noiseSeed(2);
+
+  for (int f = 0; f < map.data.height; f++) {
+    for (int i = 0; i < map.data.width; i++) {
+      map.data.background_data[i][f] = 0;
+    }
+  }
+
+  //kumos
+  for (int n = 0; n < 40000; n++) {
+    int x_len = 0;
+    int y_len = 0;
+    int index = 0;
+    int x = 0;
+    int y = 0;
+/*
+    index = 0x0206;
+    x_len = 3;
+    y_len = 1;
+    x = (int)random(0, map.data.width - x_len);
+    y = (int)random(0, map.data.height - y_len);
+    for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
+      for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
+        map.data.background_data[x_len_counter + x][y_len_counter + y] = 
+          (index + x_len_counter) + (16 * y_len_counter);
+      }
+    }
+
+    index = 0x0209;
+    x_len = 2;
+    y_len = 1;
+    x = (int)random(0, map.data.width - x_len);
+    y = (int)random(0, map.data.height - y_len);
+    for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
+      for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
+        map.data.background_data[x_len_counter + x][y_len_counter + y] = 
+          (index + x_len_counter) + (16 * y_len_counter);
+      }
+    }
+  */
+    index = 0x020c;
+    x_len = 2;
+    y_len = 1;
+    x = (int)random(0, map.data.width - x_len);
+    y = (int)random(0, map.data.height - y_len);
+    for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
+      for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
+        map.data.background_data[x_len_counter + x][y_len_counter + y] = 
+          (index + x_len_counter) + (16 * y_len_counter);
+      }
+    }
+
+    index = 0x020E;
+    x_len = 2;
+    y_len = 1;
+    x = (int)random(0, map.data.width - x_len);
+    y = (int)random(0, map.data.height - y_len);
+    for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
+      for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
+        map.data.background_data[x_len_counter + x][y_len_counter + y] = 
+          (index + x_len_counter) + (16 * y_len_counter);
+      }
+    }
+   
+  }
 
   for (int f = 0; f < map.data.height; f++) {
     for (int i = 0; i < map.data.height; i++) {
@@ -81,7 +151,7 @@ void maptest() {
       } else {
         s = 0x00;
       }
-      map.data.set(map.data.data, x, y, map.data.set_map(map.data.data[x][y], s));
+      map.data.set(map.data.data, x, y, s, 0xffff);
       if (i > 10 && noise(i/10.0, f/10.0) < ((float)(map.data.height-f)/map.data.height)/2) {
         //map.data.set(x, y, 0);
       }
@@ -109,7 +179,7 @@ void maptest() {
    }
    */
   for (int f = 0; f < map.data.height-1; f++) {
-    for (int i = 0; i < map.data.width; i++) {
+    for (int i = 10; i < map.data.width; i++) {
       //
       if (map.data.get(map.data.data, i, f+1) != 0 && map.data.get(map.data.data, i, f) == 0) {
         if (noise(i/2.0, f/2.0) < 0.2)map.data.set(map.data.data, i, f, 0x40);
@@ -120,6 +190,8 @@ void maptest() {
         if (noise(i/15.0, 1230.2) < 0.3)map.data.set(map.data.data, i, f, 0x5A);
         if (noise(i/4.0, 1230.4) < 0.3)map.data.set(map.data.data, i, f, 0x5B);
         if (noise(i/4.0, 1230.6) < 0.3)map.data.set(map.data.data, i, f, 0x5C);
+
+        if (noise(i/4.0, 4513.6) < 0.35)map.data.set(map.data.data, i, f, 0x4A);
       }
       //
     }
@@ -138,7 +210,6 @@ void maptest() {
    }
    }
    */
-  kaisiiti();
 }
 
 void kaisiiti() {
@@ -147,10 +218,11 @@ void kaisiiti() {
     if (map.data.data[x][f] != 0) {
       //
       for (int i = 0; i < player_num; i++) {
+        int index = find_mobs_by_name(mobs, "player"+i);
         int X = x*block_size;
         int Y = (f-1)*block_size;
-        players[i].tp(X, Y);
-        players[i].startpos(X, Y);
+        mobs[index].tp(X, Y);
+        mobs[index].startpos(X, Y);
       }
       break;
       //
@@ -175,7 +247,7 @@ void draw() {
   pmousey = pmouseY/SCALE;
   mousex = mouseX/SCALE;
   mousey = mouseY/SCALE;
-  if (status == 1) {
+  if (status == status.edit) {
     editor();
   }
 
@@ -216,18 +288,22 @@ void draw() {
       tx /= 30;
       ty /= 30;
       if (abs(tx) > 1 || abs(ty) > 1) {
-        g.line(x, y, x-tx, y-ty);
+        g.line(x, y, x+tx, y+ty);
       }
     }
     //
   }
+
+
+  proc_menu();
+  draw_menu();
 
   proc_characters();
   draw_characters();
 
   /*********** 前面 ***********/
   status();
-  if (status == 0) {
+  if (status == status.title) {
     title();
     start_button();
   } else {
@@ -243,6 +319,10 @@ void draw() {
 
   yoyu_old = millis();
 
-  if (DEBUG)devtext("TEST MAP "+nf(frameRate, 2, 4), 4, 4);
+  //if (DEBUG)devtext("TEST MAP "+nf(frameRate, 2, 4), 4, 4);
   //image(blocks.get(0,0,min(width,blocks.width),min(height,blocks.height)),0,0);
+  /*
+  if (DEBUG)devtext("mouse_wheel "+nf(mouse_wheel, 2, 1), 4, 4);
+   */
+  mouse_wheel = 0;
 }

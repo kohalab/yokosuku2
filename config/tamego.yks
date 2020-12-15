@@ -1,3 +1,5 @@
+name < "tamego"s
+
 img < "imgs/chas.png"s            # img
 img:nml < rect(16 ,168 ,16, 8)r # nml
 img:ago < rect(16 ,168 ,16, 8)r # ago

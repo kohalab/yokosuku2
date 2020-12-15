@@ -1,3 +1,11 @@
+enum dead_type {
+  soto, 
+    block, 
+    mob, 
+    end,
+}
+
+
 class mob {
 
   int num;
@@ -11,6 +19,8 @@ class mob {
 
   yokoscript script;
 
+  String name;
+
   boolean enable;
 
   boolean collision;
@@ -20,8 +30,8 @@ class mob {
   int score;
 
   PImage nowplayer;
-  int player_width = 0;
-  int player_height = 0;
+  int mob_width = 0;
+  int mob_height = 0;
   int ai_type;
 
   float gravity = 0;
@@ -44,6 +54,7 @@ class mob {
   int counter;
 
   PImage img;
+  PImage effect_img;
 
   background map;
 
@@ -54,10 +65,12 @@ class mob {
   int asituiteru;
   int umatteru;
   int asituiteru_len = 5;
+  int humareteru = 0;
 
   boolean deaded;
   int deadcount;
 
+  int muteki;
 
   mob() {
     setup();
@@ -134,12 +147,16 @@ class mob {
   }
   void loads() {
     img = loadImage(script.Strings.get("img"));
+    effect_img = loadImage("imgs/effect.png");
     gravity = ((float)script.floats.get("gravity"));
     ai_enable = int((float)script.floats.get("ai:enable")) != 0;
     ai_type = int((float)script.floats.get("ai:type"));
     collision = int((float)script.floats.get("collision")) != 0;
     //script.dump();
     nowplayer = get(img, script.rects.get("img:nml"));
+
+    name = script.Strings.get("name");
+    if (name == null)name = "";
   }
   void speed(float x, float y) {
     pos.xs = x;
@@ -157,14 +174,11 @@ class mob {
     }
     pos = startpos.get();
     score = 0;
+    muteki = 30;
   }
 
   int nowjump;
   int nowjumplen = 4;
-
-  int dead_soto = 0;
-  int dead_bloc = 1;
-  int dead_end = 2;
 
   int jump_count;
   int down_count;
@@ -179,6 +193,11 @@ class mob {
   float vol;
 
   float size;
+
+  float size_x;
+  float size_y;
+
+  int walksount_oneshot;
 
   int frameCount;
 
@@ -219,7 +238,7 @@ class mob {
             String t = "tk";
             int f = 0;
             //stop_sound(t+f);
-            play_sound(t+f, (int)((float)num/(player_num-1)*dwidth), vol);
+            play_sound(t+f, (int)((float)num/(mob_num-1)*dwidth), vol);
             tk0_count = 9999;
           }
         } else {
@@ -230,7 +249,7 @@ class mob {
             String t = "tk";
             int f = 1;
             //stop_sound(t+f);
-            play_sound(t+f, (int)((float)num/(player_num-1)*dwidth), vol);
+            play_sound(t+f, (int)((float)num/(mob_num-1)*dwidth), vol);
             tk1_count = 9999;
           }
         } else {
@@ -239,7 +258,7 @@ class mob {
         if (control.get("left") > 0.5) {
           if (bsdr_count == 0) {
             String t = "bsdr";
-            play_sound(t, (int)((float)num/(player_num-1)*dwidth), vol);
+            play_sound(t, (int)((float)num/(mob_num-1)*dwidth), vol);
             bsdr_count = 9999;
           }
         } else {
@@ -250,7 +269,7 @@ class mob {
             String t = "hc";
             int f = int(random(0, soundscripts.floats.get(t+"_length")));
             //stop_sound(t+f);
-            play_sound(t+f, (int)((float)num/(player_num-1)*dwidth), vol);
+            play_sound(t+f, (int)((float)num/(mob_num-1)*dwidth), vol);
             hc_count = 9999;
           }
         } else {
@@ -305,18 +324,57 @@ class mob {
         workxs += control.get("right")*script.floats.get("speed")*s;
         lr = -1;
       }
+
+      int wk = int((4.0+((work/10.0)%4.0))%4.0);
+      if (wk%2 == 1) {
+        if (walksount_oneshot == 0) {
+          if (oldasituiteru > 0) {
+            String t = "walk";
+            int f = int(random(0, soundscripts.floats.get(t+"_length")));
+            //stop_sound(t+f);
+            play_sound(t+f, (int)disp_x, vol);
+          }
+          walksount_oneshot = 1;
+        }
+      } else {
+        walksount_oneshot = 0;
+      }
+
+
       work += workxs;
       //work++;
       if (nowjump > 0)nowjump--;
+      //
 
       //
       //println(asituiteru);
       frameCount++;
       if (script.floats.get("age") != null) {
-        if (frameCount > script.floats.get("age"))dead(dead_end);
+        if (frameCount > script.floats.get("age"))dead(dead_type.end);
       }
       disp_kyori = int(disp_x-(dwidth/2));
       vol = -((disp_kyori > 0?disp_kyori:-disp_kyori)/70.0);
+
+      if (humareteru > 0) {
+        if (frameCount%2 == 0 && humareteru > 0) {
+          humareteru--;
+        }
+        if (humareteru > 0) {
+          size_y -= 0.07;
+        }
+        //
+      } else {
+        size_y = (0 + size_y*1)/2;
+      }
+
+      if (size_y < -0.75) {
+        humareteru = 5;
+        dead(dead_type.mob);
+      }
+
+      if (muteki > 0) {
+        muteki--;
+      }
     }
     collision();
   }
@@ -349,6 +407,7 @@ class mob {
     }
 
     if (ai_type == 1) {
+      //borodo
       if (ai_lr > 0) {
         control.put("right", 1f);
         control.put("left", 0f);
@@ -364,6 +423,11 @@ class mob {
       }
       //
     }
+
+    if (ai_type == 806) {
+      control.put("left", 1f);
+      work += 10;
+    }
     if (ai_type == 100) {
     }
     if (ai_type == 88580) {
@@ -371,7 +435,7 @@ class mob {
       float syokantime  = script.floats.get("syokantime");
       if (int(frameCount%syokantime) == 0) {
         mob c = new mob((int)pos.x, (int)pos.y);
-        c.script(monsters.get(name));
+        c.script(characters.get(name));
         c.loads();
         c.pos.xs = lr*script.floats.get("syokanspeed");
         c.pos.ys = -script.floats.get("syokanheight");
@@ -416,8 +480,8 @@ class mob {
       //
 
 
-      int pw = player_width;
-      int ph = player_height;
+      int pw = mob_width;
+      int ph = mob_height;
 
       int e = 0;
       for (int y = 0; y < map.DISP_HEIGHT+2; y++) {
@@ -439,7 +503,7 @@ class mob {
               (int)old.x-4, (int)old.y-(ph/2), pw+8, ph+4, check_blockconfig("!col", n)&&deb
               )) {
               if (check_blockconfig("dead", n)) {
-                dead(dead_bloc);
+                dead(dead_type.block);
               }
             }
             /*
@@ -485,9 +549,11 @@ class mob {
                     col_down = col_len;
                     if (check_blockconfig("big", n)) {
                       if (frameCount%5 == 0)size += 0.125;
+                      play_sound("bigger", (int)disp_x, vol);
                     }
                     if (check_blockconfig("small", n)) {
                       if (frameCount%5 == 0)size -= 0.125;
+                      play_sound("smaller", (int)disp_x, vol);
                     }
                     if (check_blockconfig("normal_jump", n)) {
                       pos.ys = -15;
@@ -498,10 +564,12 @@ class mob {
                     if (check_blockconfig("mover_left", n)) {
                       pos.xs -= 0.25;
                       //pos.x -= 2;
+                      play_sound("mover", (int)disp_x, vol);
                     }
                     if (check_blockconfig("mover_right", n)) {
                       pos.xs += 0.25;
                       //pos.x += 2;
+                      play_sound("mover", (int)disp_x, vol);
                     }
                     if (check_blockconfig("jump_left", n)) {
                       pos.xs = -15;
@@ -529,6 +597,12 @@ class mob {
                     if (check_blockconfig("score01", n)) {
                       if (frameCount%10 == 0)score += 1;
                     }
+                    if (check_blockconfig("muteki", n)) {
+                      if (muteki == 0) {
+                        muteki = 240;
+                        score += 100;
+                      }
+                    }
                     if (size > 3)size = 3;
                     if (size < -0.5)size = -0.5;
                     //
@@ -536,6 +610,8 @@ class mob {
                 }
               }
             //
+
+            boolean side = false;
 
             // ---- left ----
             if (
@@ -546,6 +622,7 @@ class mob {
                 pos.x -= 1;
                 pos.xs = -1;
                 col_left = col_len;
+                side = true;
               }
             }
             // ---- right ----
@@ -557,6 +634,13 @@ class mob {
                 pos.x += 1;
                 pos.xs = +1;
                 col_right = col_len;
+                side = true;
+              }
+            }
+
+            if (side) {
+              if (check_blockconfig("normal_jump", n)) {
+                pos.ys = -6;
               }
             }
             /*
@@ -590,13 +674,9 @@ class mob {
         }
       }
 
-      for (int i = 0; i < mobs_max+player_num; i++) {
+      for (int i = 0; i < mobs_max; i++) {
         mob now = null;
-        if (i < mobs_max) {
-          now = mobs[i];
-        } else {
-          now = players[i-mobs_max];
-        }
+        now = mobs[i];
 
         if (
           (now != null) &&
@@ -606,8 +686,8 @@ class mob {
           ) {
           int xp = (int)now.pos.x;
           int yp = (int)now.pos.y;
-          int bs_x = now.player_width;
-          int bs_y = now.player_height;
+          int bs_x = now.mob_width;
+          int bs_y = now.mob_height;
 
           if (
             col(xp, yp, bs_x, bs_y/2, 
@@ -623,6 +703,8 @@ class mob {
 
             asituiteru = asituiteru_len;
             col_down = col_len;
+
+            now.humareteru++;
           }
           if (
             col(xp, yp, bs_x, bs_y, 
@@ -645,7 +727,7 @@ class mob {
         //
       }
 
-      if (e == 0)dead(dead_soto);
+      if (e == 0)dead(dead_type.soto);
 
       if (col_up > 0)col_up--;
       if (col_down > 0)col_down--;
@@ -688,8 +770,8 @@ class mob {
     //println(axs, bxs);
     //if(stopcount > 0)pos.x += ((counter%2)*2);
 
-    player_width = (int)(nowplayer.width*(size+1));
-    player_height = (int)(nowplayer.height*(size+1));
+    mob_width = (int)(nowplayer.width*(size+1)*(size_x+1));
+    mob_height = (int)(nowplayer.height*(size+1)*(size_y+1));
     if (control.get("down") > 0.5) {
 
       if (down_count >= 2) {
@@ -702,56 +784,72 @@ class mob {
       if (down_count > 0 && down_count < 2) {
         rect nr = script.rects.get("img:nml");
         rect sr = script.rects.get("img:sya");
-        player_height = (int)aida(nr.h, sr.h, (down_count)/2f);
+        mob_height = (int)aida(nr.h, sr.h, (down_count)/2f);
       }
     }
 
     nowplayer = flip(get(img, r), lr==1, deaded);
     if (map == null)return;
-    disp_x = pos.x-(player_width/2)-map.scroll.x;
-    disp_y = pos.y-player_height-map.scroll.y;
-    image(nowplayer, disp_x, disp_y, player_width, player_height);
+    disp_x = pos.x-(mob_width/2)-map.scroll.x;
+    disp_y = pos.y-mob_height-map.scroll.y;
+    if (disp_x >= -mob_width && disp_y >= -mob_height && disp_x < dwidth && disp_y < dheight) {
+      image(nowplayer, disp_x, disp_y, mob_width, mob_height);
+      if (muteki > 0 && frameCount%2 != 0) {
+        if (muteki > 60 || (frameCount/2)%2 >= 1) {
+          if (muteki > 120 || (frameCount/2)%4 >= 1) {
+            image(alpha_mask(scaling(effect_img.get((frameCount%9)*16, 0, 16, 16), mob_width, mob_height), scaling(nowplayer, mob_width, mob_height)), disp_x, disp_y, mob_width, mob_height);
+            noTint();
+          }
+        }
+      }
+    }
+
     noFill();
     stroke(255, 0, 0);
-    //rect(disp_x, disp_y, player_width, player_height);
+    //rect(disp_x, disp_y, mob_width, mob_height);
     if (stopcount > 0)stopcount--;
     if (script.floats.get("player") != 0) {
       if (deaded) {
         //dead
         rect g = script.rects.get("img:gan");
-        if (disp_x >= -g.w && disp_y >= -g.h && disp_x < dwidth && disp_y < dheight) {
-          rect j = script.rects.get("jump");
-          image(get(blocks, j), num*(g.w*2), dheight-(g.h*2)-j.h);
-          image(get(img, g), num*(g.w*2), dheight-(g.h*2), g.w*2, g.h*2);
-        }
+
+        rect j = script.rects.get("jump");
+        image(get(blocks, j), num*(g.w*3), dheight-(g.h*3)-(j.h*3/2));
+        image(get(img, g), num*(g.w*3), dheight-(g.h*3), g.w*2, g.h*2);
         //
       } else {
         //alive
         rect playr = systemscripts.rects.get("text_img:player");
-        image(get(text_image, playr), ((num+0.5)*dwidth/playerscripts.length)-(playr.w/2), dheight-(playr.h*6), playr.w, playr.h);
+        image(get(text_image, playr), ((num+0.5)*dwidth/player_num)-(playr.w/2), (playr.h*3), playr.w, playr.h);
         rect scre = systemscripts.rects.get("text_img:score");
-        image(get(text_image, scre), ((num+0.5)*dwidth/playerscripts.length)-(scre.w/2), dheight-(scre.h*5), scre.w, scre.h);
+        image(get(text_image, scre), ((num+0.5)*dwidth/player_num)-(scre.w/2), (scre.h*2), scre.w, scre.h);
         int keta_num = 6;
         rect zero = systemscripts.rects.get("text_img:zero");
         rect now = null;
 
         now = new rect(zero.x, zero.y, zero.w, zero.h);
         now.x += (int)(num%10)*now.w;
-        image(get(text_image, now), ((num+0.5)*dwidth/playerscripts.length)-(playr.w/2)+playr.w, dheight-(playr.h*6), zero.w, zero.h);
+        image(get(text_image, now), ((num+0.5)*dwidth/player_num)-(playr.w/2)+playr.w, (playr.h*3), zero.w, zero.h);
         for (int i = 0; i < keta_num; i++) {
           now = new rect(zero.x, zero.y, zero.w, zero.h);
           now.x += (int)((score/pow(10, keta_num-1-i))%10)*now.w;
-          image(get(text_image, now), ((num+0.5)*dwidth/playerscripts.length)-(keta_num*zero.w/2)+(i*zero.w), dheight-(scre.h*4), zero.w, zero.h);
+          image(get(text_image, now), ((num+0.5)*dwidth/player_num)-(keta_num*zero.w/2)+(i*zero.w), (scre.h*1), zero.w, zero.h);
         }
         //
       }
     }
   }
 
-  void dead(int t) {
+  void dead(dead_type t) {
+    if (DEBUG) {
+      println(name+" has dead. dead_type:"+t);
+    }
+    if (muteki > 0) {
+      return;//nakattakotoni...
+    }
     collision = false;
     deaded = true;
-    if (t != dead_end) {
+    if (t != dead_type.end) {
       pos.ys = -6;
     }
     if (script.floats.get("nodeadsound") == null) {
@@ -762,25 +860,58 @@ class mob {
       pos.ys = 10000;
     }
     size = 0;
+    size_x = 0;
+    size_y = 0;
+
+    muteki = 30;
   }
 
   void respawn() {
-    println("respawn!");
-    loads();
-    float x = 0, y = map.data.height*block_size;
-    float kazu = 0;
-    for (int i = 0; i < players.length; i++) {
-      if (!players[i].deaded) {
-        x += players[i].pos.x;
-        y = min(y, players[i].pos.y);
-        kazu++;
+    if (script.floats.get("player") != 0) {
+      println("respawn!");
+      loads();
+      float x = 0, y = map.data.height*block_size;
+      float kazu = 0;
+      for (int i = 0; i < player_num; i++) {//全てのプレイヤーの平均値をとる
+        int index = find_mobs_by_name(mobs, "player"+i);
+        if (index >= 0) {
+          if (!mobs[index].deaded) {
+            x += mobs[index].pos.x;
+            y = min(y, mobs[index].pos.y);
+            kazu++;
+          }
+        }
+      }
+      x /= kazu;
+
+      pos.x = x;
+      pos.y = y;
+      deaded = false;
+      //
+    }
+  }
+}
+
+int find_mobs_by_name(mob[] mobs, int start, String in) {
+  //println("[find_mobs_by_name] finding:"+in);
+  int out = -1;
+  for (int i = start; i < mobs.length; i++) {
+    mob now_mob = mobs[i];
+    if (now_mob != null) {
+      if (now_mob.name != null) {
+        //println("[find_mobs_by_name] "+i+"/"+(mobs.length-1)+" name:"+now_mob.name);
+        if (now_mob.name.equals(in)) {
+          out = i;
+        }
       }
     }
-    x /= kazu;
-
-    pos.x = x;
-    pos.y = y;
-    deaded = false;
-    //
   }
+  if (out == -1) {
+    //println("[find_mobs_by_name] "+in+" has not fond");
+  }
+  return out;
+}
+
+int find_mobs_by_name(mob[] mobs, String in) {
+  return find_mobs_by_name(mobs, 0, in);
 }

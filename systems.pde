@@ -7,6 +7,7 @@ int block_size;
 color ERROR_COLOR = color(255, 0, 0);
 
 PImage blocks;
+boolean[] blocks_not_exist_list;
 /*
 boolean[] col_list = new boolean[0x10000];
  int[] freedom_list = new int[0];
@@ -92,6 +93,7 @@ void fstbegin() {
 
   blocks = loadImage(systemscripts.Strings.get("blocks"));
   int blocks_len = (blocks.width/block_size)*(blocks.height/block_size);
+
   for (int i = 0; i < 256; i++) {
     PImage now = getblock(blocks, i);
     now.loadPixels();
@@ -100,16 +102,26 @@ void fstbegin() {
       if ((now.pixels[f]>>24) != 0)e = false;
     }
     if (e) {
+      int[] old = blockconfig.get("hidden");
+      int len = 0;
+      if (old != null) {
+        len = old.length;
+      }
+      int[] newone = new int[len+1];
+      for (int c = 0; c < len; c++) {
+        newone[c] = old[c];
+      }
+      int id = i;
+      newone[len] = id;
+      blockconfig.put("hidden", newone);
       int x = (i%16)*block_size;
       int y = (i/16)*block_size;
       char[] str = new char[4];
-      String index_hex = hex(i, 2);
-      //012
-      //0FF
+      String index_hex = hex(i, 4);
       str[0] = (char)(index_hex.charAt(0)+128);
       str[1] = (char)(index_hex.charAt(1)+128);
-      str[2] = (char)('?'+128);
-      str[3] = (char)('?'+128);
+      str[2] = (char)(index_hex.charAt(2)+128);
+      str[3] = (char)(index_hex.charAt(3)+128);
       //blocks.set(x, y, getblock(blocks, 0x100));
       blocks.set(x+(block_size/2*0), y+(block_size/2*0), getdevchar(str[0]));
       blocks.set(x+(block_size/2*1), y+(block_size/2*0), getdevchar(str[1]));
@@ -168,7 +180,7 @@ void fstbegin() {
 boolean check_blockconfig(String name, int id) {
   int[] list = blockconfig.get(name);
   boolean e = false;//なかったとき
-  if(name.indexOf("!") != -1){
+  if (name.indexOf("!") != -1) {
     e = true;
   }
   if (list != null) {
@@ -177,7 +189,7 @@ boolean check_blockconfig(String name, int id) {
         return !e;//見つかった！！
       }
     }
-  }else{
+  } else {
     //println("\""+name+"\"は見つかりません");
   }
   return e;
@@ -196,11 +208,14 @@ void keyPressed() {
   }
   if (key == 'n') {
     for (int i = 0; i < monster_list.length; i++) {
-      mob c = new mob((int)players[0].pos.x, (int)players[0].pos.y);
-      c.script(monsters.get(monster_list[i]));
-      c.loads();
-      new_mobs(c);
-      println("new "+monster_list[i]);
+      if (monster_list[i].indexOf("player") != 1) {//player以外
+        int index = find_mobs_by_name(mobs, "player0");
+        mob c = new mob((int)mobs[index].pos.x, (int)mobs[index].pos.y);
+        c.script(characters.get(monster_list[i]));
+        c.loads();
+        new_mobs(c);
+        println("new "+monster_list[i]);
+      }
     }
     //
   }
@@ -210,4 +225,10 @@ void keyPressed() {
 }
 void keyReleased() {
   if (key < 0xffff)keys[key] = false;
+}
+
+float mouse_wheel;
+
+void mouseWheel(MouseEvent event) {
+  mouse_wheel = event.getCount();
 }

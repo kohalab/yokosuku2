@@ -1,3 +1,5 @@
+name < "borodo"s
+
 img < "imgs/chas.png"s            # img
 img:nml < rect(0  ,64 ,16,16)r # nml
 img:ago < rect(0  ,64 ,16,16)r # ago
