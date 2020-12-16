@@ -47,13 +47,20 @@ void setup() {
   title_start();
   map_begin();
   frameRate(30);
-  playerreset();
   maptest();
   kaisiiti();
   soundbegin();
 }
 
 void playerreset() {
+  for (int i = 0; i < player_num; i++) {
+    int[] indexs = find_mobs_by_name(mobs, "player"+i);
+
+    for (int c = 0; c < indexs.length; c++) {
+      mobs[indexs[c]] = null;
+    }
+  }
+
   for (int i = 0; i < player_num; i++) {
     mob mob = new mob(0, 0);
     mob.script(characters.get("player"+i));
@@ -76,37 +83,37 @@ void maptest() {
   }
 
   //kumos
-  for (int n = 0; n < 40000; n++) {
+  for (int n = 0; n < 10000; n++) {
     int x_len = 0;
     int y_len = 0;
     int index = 0;
     int x = 0;
     int y = 0;
-/*
+    /*
     index = 0x0206;
-    x_len = 3;
-    y_len = 1;
-    x = (int)random(0, map.data.width - x_len);
-    y = (int)random(0, map.data.height - y_len);
-    for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
-      for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
-        map.data.background_data[x_len_counter + x][y_len_counter + y] = 
-          (index + x_len_counter) + (16 * y_len_counter);
-      }
-    }
-
-    index = 0x0209;
-    x_len = 2;
-    y_len = 1;
-    x = (int)random(0, map.data.width - x_len);
-    y = (int)random(0, map.data.height - y_len);
-    for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
-      for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
-        map.data.background_data[x_len_counter + x][y_len_counter + y] = 
-          (index + x_len_counter) + (16 * y_len_counter);
-      }
-    }
-  */
+     x_len = 3;
+     y_len = 1;
+     x = (int)random(0, map.data.width - x_len);
+     y = (int)random(0, map.data.height - y_len);
+     for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
+     for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
+     map.data.background_data[x_len_counter + x][y_len_counter + y] = 
+     (index + x_len_counter) + (16 * y_len_counter);
+     }
+     }
+     
+     index = 0x0209;
+     x_len = 2;
+     y_len = 1;
+     x = (int)random(0, map.data.width - x_len);
+     y = (int)random(0, map.data.height - y_len);
+     for (int y_len_counter = 0; y_len_counter < y_len; y_len_counter++) {
+     for (int x_len_counter = 0; x_len_counter < x_len; x_len_counter++) {
+     map.data.background_data[x_len_counter + x][y_len_counter + y] = 
+     (index + x_len_counter) + (16 * y_len_counter);
+     }
+     }
+     */
     index = 0x020c;
     x_len = 2;
     y_len = 1;
@@ -130,7 +137,6 @@ void maptest() {
           (index + x_len_counter) + (16 * y_len_counter);
       }
     }
-   
   }
 
   for (int f = 0; f < map.data.height; f++) {
@@ -213,16 +219,19 @@ void maptest() {
 }
 
 void kaisiiti() {
+  playerreset();
   int x = 1;
   for (int f = 0; f < map.data.height; f++) {
     if (map.data.data[x][f] != 0) {
       //
       for (int i = 0; i < player_num; i++) {
-        int index = find_mobs_by_name(mobs, "player"+i);
-        int X = x*block_size;
-        int Y = (f-1)*block_size;
-        mobs[index].tp(X, Y);
-        mobs[index].startpos(X, Y);
+        int[] indexs = find_mobs_by_name(mobs, "player"+i);
+        for (int c = 0; c < indexs.length; c++) {
+          int X = x*block_size;
+          int Y = (f-1)*block_size;
+          mobs[indexs[c]].tp(X, Y);
+          mobs[indexs[c]].startpos(X, Y);
+        }
       }
       break;
       //

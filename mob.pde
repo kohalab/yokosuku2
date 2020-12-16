@@ -872,46 +872,62 @@ class mob {
       loads();
       float x = 0, y = map.data.height*block_size;
       float kazu = 0;
+      int alive = 0;
       for (int i = 0; i < player_num; i++) {//全てのプレイヤーの平均値をとる
-        int index = find_mobs_by_name(mobs, "player"+i);
-        if (index >= 0) {
-          if (!mobs[index].deaded) {
-            x += mobs[index].pos.x;
-            y = min(y, mobs[index].pos.y);
+        int[] indexs = find_mobs_by_name(mobs, "player"+i);
+        for (int c = 0; c < indexs.length; c++) {
+          if (!mobs[indexs[c]].deaded) {
+            x += mobs[indexs[c]].pos.x;
+            y = min(y, mobs[indexs[c]].pos.y);
             kazu++;
           }
+          alive++;
         }
       }
-      x /= kazu;
 
-      pos.x = x;
-      pos.y = y;
-      deaded = false;
+      if (alive >= 1) {
+        x /= kazu;
+
+        pos.x = x;
+        pos.y = y;
+        deaded = false;
+      } else {
+        kaisiiti();
+      }
       //
     }
   }
 }
 
-int find_mobs_by_name(mob[] mobs, int start, String in) {
+int[] find_mobs_by_name(mob[] mobs, int start, String in) {
   //println("[find_mobs_by_name] finding:"+in);
-  int out = -1;
+  int[] out = new int[0];
   for (int i = start; i < mobs.length; i++) {
     mob now_mob = mobs[i];
     if (now_mob != null) {
       if (now_mob.name != null) {
         //println("[find_mobs_by_name] "+i+"/"+(mobs.length-1)+" name:"+now_mob.name);
         if (now_mob.name.equals(in)) {
-          out = i;
+          int[] new_out = new int[out.length + 1];
+          for (int c = 0; c < out.length; c++) {
+            new_out[c] = out[c];
+          }
+          new_out[out.length] = i;
+          out = new int[new_out.length];
+          for (int c = 0; c < new_out.length; c++) {
+            out[c] = new_out[c];
+          }
+          //
         }
       }
     }
   }
-  if (out == -1) {
+  if (out.length == 0) {
     //println("[find_mobs_by_name] "+in+" has not fond");
   }
   return out;
 }
 
-int find_mobs_by_name(mob[] mobs, String in) {
+int[] find_mobs_by_name(mob[] mobs, String in) {
   return find_mobs_by_name(mobs, 0, in);
 }

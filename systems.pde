@@ -209,8 +209,8 @@ void keyPressed() {
   if (key == 'n') {
     for (int i = 0; i < monster_list.length; i++) {
       if (monster_list[i].indexOf("player") != 1) {//player以外
-        int index = find_mobs_by_name(mobs, "player0");
-        mob c = new mob((int)mobs[index].pos.x, (int)mobs[index].pos.y);
+        int[] indexs = find_mobs_by_name(mobs, "player0");
+        mob c = new mob((int)mobs[indexs[0]].pos.x, (int)mobs[indexs[0]].pos.y);
         c.script(characters.get(monster_list[i]));
         c.loads();
         new_mobs(c);

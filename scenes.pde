@@ -569,11 +569,11 @@ void scroller() {
   int smp = 0;
   nokori = 0;
   for (int i = 0; i < player_num; i++) {
-    int index = find_mobs_by_name(mobs, "player"+i);
-    if (index >= 0) {
-      if (!mobs[index].deaded) {
-        hekinx += mobs[index].pos.x;
-        hekiny += mobs[index].pos.y;
+    int[] indexs = find_mobs_by_name(mobs, "player"+i);
+    for (int c = 0; c < indexs.length; c++) {
+      if (!mobs[indexs[c]].deaded) {
+        hekinx += mobs[indexs[c]].pos.x;
+        hekiny += mobs[indexs[c]].pos.y;
         smp++;
         nokori++;
       } else {
