@@ -147,7 +147,7 @@ void maptest() {
 
       float e = noise(i/2.0/100.0, f/2.0/50.0);
       e -= 0.5;
-      e /= 5;
+      e /= 3.5;
       e += 0.5;
 
 
@@ -266,6 +266,7 @@ void draw() {
   simple_background();
   map.proc();
   map.mapdraw();
+  map.replace(replace_list);
   image(map.get(), 0, 0);
   //************** test **************//
   g.strokeWeight(1);

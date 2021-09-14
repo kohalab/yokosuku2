@@ -23,7 +23,7 @@ ago_time < 60f
 ago      < 4f
 
 ai:enable < 1f
-ai:type < 0f
+ai:normal < 1f
 
 player   < 0f
 

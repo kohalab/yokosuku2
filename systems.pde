@@ -31,6 +31,8 @@ boolean[] col_list = new boolean[0x10000];
  */
 HashMap <String, int[]>blockconfig = new HashMap<String, int[]>();
 
+HashMap <Integer, Integer>replace_list = new HashMap<Integer, Integer>();
+
 PImage devfont;
 PImage text_image;
 
@@ -175,6 +177,22 @@ void fstbegin() {
     }
     //
   }
+
+  String[] replace_in = loadStrings("config/replace.brl");
+  //replace_list
+  for (int i = 0; i < replace_in.length; i++) {
+    replace_in[i] = replace_in[i].replaceAll(" ", "");
+    if (replace_in[i].length() >= 1) {
+      String m = splitTokens(replace_in[i], ";")[0];
+      //println(m);
+      if (m.length() == 5) {
+        int before = unhex(m.substring(0, 2));
+        int after = unhex(m.substring(3, 5));
+        replace_list.put(before, after);
+      }
+      //
+    }
+  }
 }
 
 boolean check_blockconfig(String name, int id) {
@@ -207,9 +225,10 @@ void keyPressed() {
     }
   }
   if (key == 'n') {
+    int[] indexs = find_mobs_by_name(mobs, "player0");
+    //println(indexs);
     for (int i = 0; i < monster_list.length; i++) {
-      if (monster_list[i].indexOf("player") != 1) {//player以外
-        int[] indexs = find_mobs_by_name(mobs, "player0");
+      if (monster_list[i].indexOf("player") < 0) {//player以外
         mob c = new mob((int)mobs[indexs[0]].pos.x, (int)mobs[indexs[0]].pos.y);
         c.script(characters.get(monster_list[i]));
         c.loads();

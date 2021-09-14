@@ -150,7 +150,6 @@ class mob {
     effect_img = loadImage("imgs/effect.png");
     gravity = ((float)script.floats.get("gravity"));
     ai_enable = int((float)script.floats.get("ai:enable")) != 0;
-    ai_type = int((float)script.floats.get("ai:type"));
     collision = int((float)script.floats.get("collision")) != 0;
     //script.dump();
     nowplayer = get(img, script.rects.get("img:nml"));
@@ -359,7 +358,8 @@ class mob {
         if (frameCount%2 == 0 && humareteru > 0) {
           humareteru--;
         }
-        if (humareteru > 0) {
+
+        if (humareteru > 0 && muteki == 0) {
           size_y -= 0.07;
         }
         //
@@ -382,7 +382,7 @@ class mob {
   int ai_lr = +1;
   void ai() {
     //
-    if (ai_type == 0) {
+    if ((script.floats.get("ai:normal") != null) && script.floats.get("ai:normal") >= 0.5) {
       if (ai_lr > 0) {
         control.put("right", 1f);
         control.put("left", 0f);
@@ -400,13 +400,13 @@ class mob {
       /*
       
        */
-
-      if (col_right > 0 && random(100) < 50)ai_lr = +1;
-      if (col_left > 0 && random(100) < 50)ai_lr = -1;
+      //壁に触れた時にフレームあたり1%の確率で逆の方向を向く
+      if (col_right > 0 && random(100) < 1 && ai_lr < 0)ai_lr = +1;
+      if (col_left > 0 && random(100) < 1 && ai_lr > 0)ai_lr = -1;
       //
     }
 
-    if (ai_type == 1) {
+    if ((script.floats.get("ai:run") != null) && script.floats.get("ai:run") >= 0.5) {
       //borodo
       if (ai_lr > 0) {
         control.put("right", 1f);
@@ -415,7 +415,8 @@ class mob {
         control.put("right", 0f);
         control.put("left", 1f);
       }
-
+    }
+    if ((script.floats.get("ai:autojump") != null) && script.floats.get("ai:autojump") >= 0.5) {
       if (col_right > 0 || col_left > 0) {
         control.put("jump", 1f);
       } else {
@@ -424,13 +425,15 @@ class mob {
       //
     }
 
-    if (ai_type == 806) {
+    if ((script.floats.get("ai:animleft") != null) && script.floats.get("ai:animleft") >= 0.5) {
       control.put("left", 1f);
       work += 10;
     }
-    if (ai_type == 100) {
+    if ((script.floats.get("ai:animright") != null) && script.floats.get("ai:animright") >= 0.5) {
+      control.put("right", 1f);
+      work += 10;
     }
-    if (ai_type == 88580) {
+    if ((script.floats.get("ai:syokan") != null) && script.floats.get("ai:syokan") >= 0.5) {
       String name = script.Strings.get("syokanname");
       float syokantime  = script.floats.get("syokantime");
       if (int(frameCount%syokantime) == 0) {
@@ -818,23 +821,25 @@ class mob {
         image(get(img, g), num*(g.w*3), dheight-(g.h*3), g.w*2, g.h*2);
         //
       } else {
+        /*
         //alive
-        rect playr = systemscripts.rects.get("text_img:player");
-        image(get(text_image, playr), ((num+0.5)*dwidth/player_num)-(playr.w/2), (playr.h*3), playr.w, playr.h);
-        rect scre = systemscripts.rects.get("text_img:score");
-        image(get(text_image, scre), ((num+0.5)*dwidth/player_num)-(scre.w/2), (scre.h*2), scre.w, scre.h);
-        int keta_num = 6;
-        rect zero = systemscripts.rects.get("text_img:zero");
-        rect now = null;
-
-        now = new rect(zero.x, zero.y, zero.w, zero.h);
-        now.x += (int)(num%10)*now.w;
-        image(get(text_image, now), ((num+0.5)*dwidth/player_num)-(playr.w/2)+playr.w, (playr.h*3), zero.w, zero.h);
-        for (int i = 0; i < keta_num; i++) {
-          now = new rect(zero.x, zero.y, zero.w, zero.h);
-          now.x += (int)((score/pow(10, keta_num-1-i))%10)*now.w;
-          image(get(text_image, now), ((num+0.5)*dwidth/player_num)-(keta_num*zero.w/2)+(i*zero.w), (scre.h*1), zero.w, zero.h);
-        }
+         rect playr = systemscripts.rects.get("text_img:player");
+         image(get(text_image, playr), ((num+0.5)*dwidth/player_num)-(playr.w/2), (playr.h*3), playr.w, playr.h);
+         rect scre = systemscripts.rects.get("text_img:score");
+         image(get(text_image, scre), ((num+0.5)*dwidth/player_num)-(scre.w/2), (scre.h*2), scre.w, scre.h);
+         int keta_num = 6;
+         rect zero = systemscripts.rects.get("text_img:zero");
+         rect now = null;
+         
+         now = new rect(zero.x, zero.y, zero.w, zero.h);
+         now.x += (int)(num%10)*now.w;
+         image(get(text_image, now), ((num+0.5)*dwidth/player_num)-(playr.w/2)+playr.w, (playr.h*3), zero.w, zero.h);
+         for (int i = 0; i < keta_num; i++) {
+         now = new rect(zero.x, zero.y, zero.w, zero.h);
+         now.x += (int)((score/pow(10, keta_num-1-i))%10)*now.w;
+         image(get(text_image, now), ((num+0.5)*dwidth/player_num)-(keta_num*zero.w/2)+(i*zero.w), (scre.h*1), zero.w, zero.h);
+         }
+         */
         //
       }
     }

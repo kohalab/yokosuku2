@@ -57,6 +57,8 @@ class background {
 
   PGraphics g;
 
+  HashMap <Integer, Integer>replace_list;
+
   background(int W, int H) {
     data = new background_data();
     resize(W, H);
@@ -122,6 +124,9 @@ class background {
     g.endDraw();
     //
   }
+  void replace(HashMap <Integer, Integer>replace_list) {
+    this.replace_list = replace_list;
+  }
   int bitcount(int a) {
     int o = 0;
     o += (a&(1<<0)) != 0?1:0;
@@ -134,6 +139,7 @@ class background {
     o += (a&(1<<7)) != 0?1:0;
     return o;
   }
+  int replace_count;
   void proc() {
     for (int x = 0; x < data.width; x++) {
       data.data[x][0] = 0;
@@ -146,42 +152,73 @@ class background {
     //
     int scrx = (int)scroll.x/block_size;
     int scry = (int)scroll.y/block_size;
+    /*
+    for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {
+     for (int x = scrx-2; x < scrx+2+DISP_WIDTH; x++) {
+     if (x >= 0 && y >= 0 && x < data.width && y < data.height) {
+     data.overlay_data[x][y] = 0;
+     }
+     }
+     }
+     */
+    int[] freedom_list = blockconfig.get("freedom");
+
     for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {
       for (int x = scrx-2; x < scrx+2+DISP_WIDTH; x++) {
         if (x >= 0 && y >= 0 && x < data.width && y < data.height) {
-          data.overlay_data[x][y] = 0;
-        }
-      }
-    }
-    int[] freedom_list = blockconfig.get("freedom");
-    for (int i = 0; i <  freedom_list.length; i++) {
-      //
-      int t1 = freedom_list[i];
-      for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {
-        for (int x = scrx-2; x < scrx+2+DISP_WIDTH; x++) {
           //
-          if ((t1/32) == (data.get(data.data, x, y)/32)) {
-            int n = otonari_san(data.data, x, y, (data.get(data.data, x, y)));
-            //println(n);
-            int a = naname_san(data.data, x, y, (data.get(data.data, x, y)));
-            if (n == 15) {
-              if (a == 0) {
-                a += 16;
-                data.overlay_data[x][y] = 0;
-              } else {
-                a += 16;
-                data.overlay_data[x][y] = (((data.get(data.data, x, y)/32)*32)+a);
+          boolean changed = false;
+          for (int i = 0; i <  freedom_list.length; i++) {
+            //
+            int t1 = freedom_list[i];
+            //
+            if ((t1/32) == (data.get(data.data, x, y)/32)) {
+              int n = otonari_san(data.data, x, y, (data.get(data.data, x, y)));
+              //println(n);
+              int a = naname_san(data.data, x, y, (data.get(data.data, x, y)));
+              if (n == 15) {
+                if (a == 0) {
+                  a += 16;
+                  data.overlay_data[x][y] = 0;
+                } else {
+                  a += 16;
+                  data.overlay_data[x][y] = (((data.get(data.data, x, y)/32)*32)+a);
+                }
+                changed = true;
               }
+              data.data[x][y] = (((data.get(data.data, x, y)/32)*32)+n);
+              //
             }
-            data.data[x][y] = (((data.get(data.data, x, y)/32)*32)+n);
             //
           }
-          //
+          if (!changed) {
+            data.overlay_data[x][y] = 0;
+          }
         }
+        //
       }
-      //
     }
     //
+
+    //replace
+    if (replace_list != null && replace_count == 0) {
+      for (int y = scry-2; y < scry+2+DISP_HEIGHT; y++) {
+        for (int x = scrx-2; x < scrx+2+DISP_WIDTH; x++) {
+          if (x >= 0 && y >= 0 && x < data.width && y < data.height) {
+            int a = data.data[x][y];
+            Integer list = replace_list.get(a);
+            if (list != null) {
+              a = list;
+            }
+            data.data[x][y] = a;
+          }
+        }
+      }
+    }
+    replace_count++;
+    if (replace_count > 1) {
+      replace_count = 0;
+    }
   }
   int otonari_san(int[][] in, int x, int y, int k) {
     int a = data.get(in, x, y-1);
@@ -606,6 +643,22 @@ void status() {
     fill(0);
     textFont(system_font);
     text(systemscripts.Strings.get("reset_text"), x-(textWidth(systemscripts.Strings.get("reset_text"))/2), y-16+(img.h*2));
+  }
+  if (status != status_s.title) {//score
+    int score = 123456789;
+    int digits = 9;
+    for (int i = 0; i < digits; i++) {
+      rect r = new rect(((score / (int)pow(10, digits - 1 -i)) % 10) * 8, 16, 8, 8);
+      for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+          tint(0, 96);
+          image(get(text_image, r), i*9+x + 12, 0+y + 12);
+        }
+      }
+      tint(255);
+      image(get(text_image, r), i*9 + 12, 0 + 12);
+      noTint();
+    }
   }
 }
 

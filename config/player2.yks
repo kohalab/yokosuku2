@@ -10,7 +10,7 @@ img:stp < rect(80,64,16,32)r # stoop
 img:sya < rect(128,67,37,13)r # syagamu
 img:sya2 < rect(128,83,37,13)r # syagamu2
 img:gan < rect(240,64,14,13)r # ga-n
-img:uem < rect(112,64,16,32)r # uemiru
+img:uem < rect(112,72,16,24)r # uemiru
 
 jump < rect(224, 4080,32,8)r # ga-n
 
@@ -27,7 +27,6 @@ ago      < 4f
 sya_anime < 1f
 
 ai:enable < 0f
-ai:type < 0f
 
 player   < 1f
 
